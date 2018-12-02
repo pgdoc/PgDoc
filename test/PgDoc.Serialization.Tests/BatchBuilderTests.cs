@@ -60,7 +60,8 @@ namespace PgDoc.Serialization.Tests
         public void CheckCheck_Error()
         {
             Check(transactionGuids[0], ByteString.Empty);
-            Assert.Throws<InvalidOperationException>(() => Check(transactionGuids[0], versions[0]));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Check(transactionGuids[0], versions[0]));
+            Assert.Equal($"A different version of document {transactionGuids[0].Value} is already being checked.", exception.Message);
         }
 
         [Fact]
@@ -79,7 +80,8 @@ namespace PgDoc.Serialization.Tests
         public void CheckModify_Error()
         {
             Check(transactionGuids[0], ByteString.Empty);
-            Assert.Throws<InvalidOperationException>(() => Modify(transactionGuids[0], versions[0]));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Modify(transactionGuids[0], versions[0]));
+            Assert.Equal($"A different version of document {transactionGuids[0].Value} is already being checked.", exception.Message);
         }
 
         [Fact]
@@ -98,14 +100,16 @@ namespace PgDoc.Serialization.Tests
         public void ModifyCheck_Error()
         {
             Modify(transactionGuids[0], ByteString.Empty);
-            Assert.Throws<InvalidOperationException>(() => Check(transactionGuids[0], versions[0]));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Check(transactionGuids[0], versions[0]));
+            Assert.Equal($"A different version of document {transactionGuids[0].Value} is already being modified.", exception.Message);
         }
 
         [Fact]
         public void ModifyModify_Error()
         {
             Modify(transactionGuids[0], ByteString.Empty);
-            Assert.Throws<InvalidOperationException>(() => Modify(transactionGuids[0], ByteString.Empty));
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Modify(transactionGuids[0], ByteString.Empty));
+            Assert.Equal($"Document {transactionGuids[0].Value} is already being modified.", exception.Message);
         }
 
         private void Modify(EntityId entityId, ByteString version)

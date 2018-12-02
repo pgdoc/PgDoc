@@ -91,11 +91,37 @@ namespace PgDoc.Serialization.Tests
         [Fact]
         public void Create_Success()
         {
+            TestObject testObject = new TestObject()
+            {
+                Int64Value = 100
+            };
+
+            JsonEntity<TestObject> result = JsonEntity<TestObject>.Create(testObject, new EntityType(1));
+
+            Assert.Equal(1, result.Id.Type.Value);
+            Assert.Equal(testObject, result.Entity);
+            Assert.Equal(ByteString.Empty, result.Version);
         }
 
         [Fact]
         public void Modify_Success()
         {
+            TestObject initialObject = new TestObject()
+            {
+                Int64Value = 100
+            };
+
+            TestObject newObject = new TestObject()
+            {
+                Int64Value = 200
+            };
+
+            JsonEntity<TestObject> initialValue = new JsonEntity<TestObject>(new EntityId(guid), initialObject, ByteString.Parse("abcd"));
+            JsonEntity<TestObject> result = initialValue.Modify(newObject);
+
+            Assert.Equal(new EntityId(guid), result.Id);
+            Assert.Equal(200, result.Entity.Int64Value);
+            Assert.Equal(ByteString.Parse("abcd"), result.Version);
         }
 
         public class TestObject
