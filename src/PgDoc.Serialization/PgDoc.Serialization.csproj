@@ -1,14 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <VersionPrefix>0.4.0</VersionPrefix>
     <TargetFramework>netstandard2.0</TargetFramework>
 
     <Title>PgDoc</Title>
-    <Description></Description>
+    <Description>PgDoc.Serialization is a library for serializing .NET objects to JSON and store them into a PostgreSQL document store.</Description>
     <Authors>Flavien Charlon</Authors>
     <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-    <Copyright>Copyright � 2016 Flavien Charlon</Copyright>
+    <Copyright>Copyright © 2016 Flavien Charlon</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
