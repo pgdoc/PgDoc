@@ -21,7 +21,7 @@ namespace PgDoc.Serialization.Tests
 {
     public class BatchBuilderTests
     {
-        private static readonly EntityId[] transactionGuids = Enumerable.Range(0, 20).Select(i => EntityId.New(new EntityType(1))).ToArray();
+        private static readonly EntityId[] entityIds = Enumerable.Range(0, 20).Select(i => EntityId.New(new EntityType(1))).ToArray();
         private static readonly ByteString[] versions = Enumerable.Range(0, 20).Select(i => new ByteString(new byte[] { 255, (byte)i })).ToArray();
 
         private readonly TestDocumentStore store;
@@ -36,20 +36,54 @@ namespace PgDoc.Serialization.Tests
         [Fact]
         public async Task Submit_Success()
         {
-            Check(transactionGuids[0], ByteString.Empty);
-            Modify(transactionGuids[1], ByteString.Empty);
+            Check(entityIds[0], ByteString.Empty);
+            Modify(entityIds[1], ByteString.Empty);
 
             ByteString version = await builder.Submit();
 
             Assert.Equal(1, store.Store.Count);
-            Assert.Equal(store.Store[transactionGuids[1].Value].Item2, version);
+            Assert.Equal(store.Store[entityIds[1].Value].Item2, version);
+        }
+
+        [Fact]
+        public async Task MultipleModify_Error()
+        {
+            builder.Modify(new Document(entityIds[0].Value, "{'abc':'def'}", ByteString.Empty));
+
+            Assert.Throws<InvalidOperationException>(() =>
+                builder.Modify(
+                    new Document(entityIds[1].Value, "{'abc':'def'}", versions[0]),
+                    new Document(entityIds[0].Value, "{'abc':'def'}", versions[1])));
+
+            // The modification of the other document should not occur and no conflict should be raised by the data store
+            ByteString version = await builder.Submit();
+
+            Assert.Equal(1, store.Store.Count);
+            Assert.Equal(store.Store[entityIds[0].Value].Item2, version);
+        }
+
+        [Fact]
+        public async Task MultipleCheck_Error()
+        {
+            builder.Modify(new Document(entityIds[0].Value, "{'abc':'def'}", ByteString.Empty));
+
+            Assert.Throws<InvalidOperationException>(() =>
+                builder.Check(
+                    new Document(entityIds[1].Value, "{'abc':'def'}", versions[0]),
+                    new Document(entityIds[0].Value, "{'abc':'def'}", versions[1])));
+
+            // The version check on the other document should not occur and no conflict should be raised by the data store
+            ByteString version = await builder.Submit();
+
+            Assert.Equal(1, store.Store.Count);
+            Assert.Equal(store.Store[entityIds[0].Value].Item2, version);
         }
 
         [Fact]
         public async Task CheckCheck_Success()
         {
-            Check(transactionGuids[0], ByteString.Empty);
-            Check(transactionGuids[0], ByteString.Empty);
+            Check(entityIds[0], ByteString.Empty);
+            Check(entityIds[0], ByteString.Empty);
 
             ByteString version = await builder.Submit();
 
@@ -59,57 +93,61 @@ namespace PgDoc.Serialization.Tests
         [Fact]
         public void CheckCheck_Error()
         {
-            Check(transactionGuids[0], ByteString.Empty);
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Check(transactionGuids[0], versions[0]));
-            Assert.Equal($"A different version of document {transactionGuids[0].Value} is already being checked.", exception.Message);
+            Check(entityIds[0], ByteString.Empty);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Check(entityIds[0], versions[0]));
+            Assert.Equal($"A different version of document {entityIds[0].Value} is already being checked.", exception.Message);
         }
 
         [Fact]
         public async Task CheckModify_Success()
         {
-            Check(transactionGuids[0], ByteString.Empty);
-            Modify(transactionGuids[0], ByteString.Empty);
+            Check(entityIds[0], ByteString.Empty);
+            Modify(entityIds[0], ByteString.Empty);
 
             ByteString version = await builder.Submit();
 
             Assert.Equal(1, store.Store.Count);
-            Assert.Equal(store.Store[transactionGuids[0].Value].Item2, version);
+            Assert.Equal(store.Store[entityIds[0].Value].Item2, version);
         }
 
         [Fact]
         public void CheckModify_Error()
         {
-            Check(transactionGuids[0], ByteString.Empty);
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Modify(transactionGuids[0], versions[0]));
-            Assert.Equal($"A different version of document {transactionGuids[0].Value} is already being checked.", exception.Message);
+            Check(entityIds[0], ByteString.Empty);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Modify(entityIds[0], versions[0]));
+            Assert.Equal($"A different version of document {entityIds[0].Value} is already being checked.", exception.Message);
         }
 
         [Fact]
         public async Task ModifyCheck_Success()
         {
-            Modify(transactionGuids[0], ByteString.Empty);
-            Check(transactionGuids[0], ByteString.Empty);
+            Modify(entityIds[0], ByteString.Empty);
+            Check(entityIds[0], ByteString.Empty);
 
             ByteString version = await builder.Submit();
 
             Assert.Equal(1, store.Store.Count);
-            Assert.Equal(store.Store[transactionGuids[0].Value].Item2, version);
+            Assert.Equal(store.Store[entityIds[0].Value].Item2, version);
         }
 
         [Fact]
         public void ModifyCheck_Error()
         {
-            Modify(transactionGuids[0], ByteString.Empty);
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Check(transactionGuids[0], versions[0]));
-            Assert.Equal($"A different version of document {transactionGuids[0].Value} is already being modified.", exception.Message);
+            Modify(entityIds[0], ByteString.Empty);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Check(entityIds[0], versions[0]));
+            Assert.Equal($"A different version of document {entityIds[0].Value} is already being modified.", exception.Message);
         }
 
         [Fact]
         public void ModifyModify_Error()
         {
-            Modify(transactionGuids[0], ByteString.Empty);
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Modify(transactionGuids[0], ByteString.Empty));
-            Assert.Equal($"Document {transactionGuids[0].Value} is already being modified.", exception.Message);
+            Modify(entityIds[0], ByteString.Empty);
+
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Modify(entityIds[0], ByteString.Empty));
+            Assert.Equal($"Document {entityIds[0].Value} is already being modified.", exception.Message);
         }
 
         private void Modify(EntityId entityId, ByteString version)

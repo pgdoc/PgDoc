@@ -43,8 +43,7 @@ namespace PgDoc.Serialization
                     else
                         throw new InvalidOperationException($"A different version of document {document.Id} is already being checked.");
                 }
-
-                if (modifiedDocuments.TryGetValue(document.Id, out existingDocument))
+                else if (modifiedDocuments.TryGetValue(document.Id, out existingDocument))
                 {
                     if (existingDocument.Version.Equals(document.Version))
                         continue;
@@ -80,8 +79,7 @@ namespace PgDoc.Serialization
                     else
                         throw new InvalidOperationException($"A different version of document {document.Id} is already being checked.");
                 }
-
-                if (modifiedDocuments.TryGetValue(document.Id, out existingDocument))
+                else if (modifiedDocuments.TryGetValue(document.Id, out existingDocument))
                 {
                     throw new InvalidOperationException($"Document {document.Id} is already being modified.");
                 }
