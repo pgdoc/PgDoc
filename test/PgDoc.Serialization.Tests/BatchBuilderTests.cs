@@ -114,12 +114,22 @@ namespace PgDoc.Serialization.Tests
 
         private void Modify(EntityId entityId, ByteString version)
         {
-            this.builder.Modify(new Document(entityId.Value, "{'abc':'def'}", version));
+            this.builder.Modify(new JsonEntity<TestObject>(entityId, new TestObject("abc"), version));
         }
 
         private void Check(EntityId entityId, ByteString version)
         {
-            this.builder.Check(new Document(entityId.Value, "{'abc':'def'}", version));
+            this.builder.Check(new JsonEntity<TestObject>(entityId, new TestObject("def"), version));
+        }
+
+        public class TestObject
+        {
+            public TestObject(string value)
+            {
+                this.Value = value;
+            }
+
+            public string Value { get; set; }
         }
     }
 }

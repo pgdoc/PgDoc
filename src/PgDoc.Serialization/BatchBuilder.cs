@@ -26,7 +26,7 @@ namespace PgDoc.Serialization
 
         public BatchBuilder(IDocumentStore store)
         {
-            this.dataStore = store;
+            this.dataStore = store ?? throw new ArgumentNullException(nameof(store));
         }
 
         public void Check(params Document[] documents)
@@ -59,6 +59,12 @@ namespace PgDoc.Serialization
                 this.checkedDocuments.Add(document.Id, document);
         }
 
+        public void Check<T>(JsonEntity<T> document)
+            where T : class
+        {
+            Check(document.AsDocument());
+        }
+
         public void Modify(params Document[] documents)
         {
             List<Guid> removeCheckedDocuments = new List<Guid>();
@@ -88,6 +94,12 @@ namespace PgDoc.Serialization
 
             foreach (Document document in addModifyDocuments)
                 this.modifiedDocuments.Add(document.Id, document);
+        }
+
+        public void Modify<T>(JsonEntity<T> document)
+            where T : class
+        {
+            Modify(document.AsDocument());
         }
 
         public async Task<ByteString> Submit()

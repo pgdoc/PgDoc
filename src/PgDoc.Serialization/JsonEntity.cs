@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Newtonsoft.Json;
 
 namespace PgDoc.Serialization
@@ -23,7 +24,7 @@ namespace PgDoc.Serialization
         {
             this.Id = id;
             this.Entity = entity;
-            this.Version = version;
+            this.Version = version ?? throw new ArgumentNullException(nameof(version));
         }
 
         public EntityId Id { get; }

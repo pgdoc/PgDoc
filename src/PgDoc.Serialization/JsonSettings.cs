@@ -21,8 +21,6 @@ namespace PgDoc.Serialization
     {
         public static JsonSerializerSettings Settings { get; }
 
-        public static IList<JsonConverter> Converters => Settings.Converters;
-
         static JsonSettings()
         {
             List<JsonConverter> converters = new List<JsonConverter>()
