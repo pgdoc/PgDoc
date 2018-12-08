@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>1.0.0</VersionPrefix>
-    <Title>PgDoc</Title>
+    <VersionPrefix>1.0.1</VersionPrefix>
+    <Title>PgDoc.Serialization</Title>
     <Description>PgDoc.Serialization is a library for serializing .NET objects to JSON and store them into a PostgreSQL document store.</Description>
     <Authors>Flavien Charlon</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
