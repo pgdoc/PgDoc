@@ -34,6 +34,13 @@ namespace PgDoc.Serialization.Tests
         }
 
         [Fact]
+        public void Constructor_Exception()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new BatchBuilder(null));
+        }
+
+        [Fact]
         public async Task Submit_Success()
         {
             Check(entityIds[0], ByteString.Empty);

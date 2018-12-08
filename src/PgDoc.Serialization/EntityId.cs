@@ -19,7 +19,7 @@ using System.Threading;
 
 namespace PgDoc.Serialization
 {
-    public class EntityId : IEquatable<EntityId>
+    public class EntityId : IEquatable<EntityId?>
     {
         private static readonly ThreadLocal<RandomNumberGenerator> random = new ThreadLocal<RandomNumberGenerator>(() => RandomNumberGenerator.Create());
 
@@ -69,7 +69,7 @@ namespace PgDoc.Serialization
             }
         }
 
-        public bool Equals(EntityId other)
+        public bool Equals(EntityId? other)
         {
             return other != null && this.Value.Equals(other.Value);
         }

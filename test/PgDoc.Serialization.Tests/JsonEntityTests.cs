@@ -22,6 +22,13 @@ namespace PgDoc.Serialization.Tests
         private static readonly Guid guid = Guid.Parse("f81428a9-0bd9-4d75-95bf-976225f24cf1");
 
         [Fact]
+        public void Constructor_Exception()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new JsonEntity<string>(new EntityId(guid), "abc", null));
+        }
+
+        [Fact]
         public void FromDocument_Success()
         {
             TestObject testObject = new TestObject()
@@ -49,6 +56,23 @@ namespace PgDoc.Serialization.Tests
             Assert.Equal(100.001m, result.Entity.DecimalValue);
             Assert.Equal(ByteString.Parse("abcdef0123456789"), result.Entity.ByteValue);
             Assert.Equal(new DateTime(2010, 6, 5, 4, 3, 2), result.Entity.DateValue);
+        }
+
+        [Fact]
+        public void FromDocument_Null()
+        {
+            JsonEntity<TestObject> entity = new JsonEntity<TestObject>(new EntityId(guid), null, ByteString.Parse("abcd"));
+
+            Document document = entity.AsDocument();
+            JsonEntity<TestObject> result = JsonEntity<TestObject>.FromDocument(document);
+
+            Assert.Equal(guid, document.Id);
+            Assert.Equal(ByteString.Parse("abcd"), document.Version);
+            Assert.Null(document.Body);
+
+            Assert.Equal(guid, result.Id.Value);
+            Assert.Equal(ByteString.Parse("abcd"), result.Version);
+            Assert.Null(result.Entity);
         }
 
         [Theory]

@@ -26,7 +26,7 @@ namespace PgDoc.Serialization
             return objectType == typeof(DateTime) || objectType == typeof(DateTime?);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             if (reader.Value == null)
             {

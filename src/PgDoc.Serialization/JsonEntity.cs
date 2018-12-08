@@ -20,7 +20,7 @@ namespace PgDoc.Serialization
     public class JsonEntity<T>
         where T : class
     {
-        public JsonEntity(EntityId id, T entity, ByteString version)
+        public JsonEntity(EntityId id, T? entity, ByteString version)
         {
             this.Id = id;
             this.Entity = entity;
@@ -31,11 +31,14 @@ namespace PgDoc.Serialization
 
         public ByteString Version { get; }
 
-        public T Entity { get; }
+        public T? Entity { get; }
 
         public Document AsDocument()
         {
-            return new Document(Id.Value, JsonConvert.SerializeObject(this.Entity, JsonSettings.Settings), Version);
+            return new Document(
+                Id.Value,
+                this.Entity == null ? null : JsonConvert.SerializeObject(this.Entity, JsonSettings.Settings),
+                Version);
         }
 
         public static JsonEntity<T> FromDocument(Document document)

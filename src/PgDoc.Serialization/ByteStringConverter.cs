@@ -24,7 +24,7 @@ namespace PgDoc.Serialization
             return objectType == typeof(ByteString);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             string encodedData = (string)reader.Value;
 
