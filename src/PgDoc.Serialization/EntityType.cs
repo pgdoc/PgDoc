@@ -14,7 +14,7 @@
 
 namespace PgDoc.Serialization
 {
-    public struct EntityType
+    public readonly struct EntityType
     {
         public EntityType(short value)
         {
