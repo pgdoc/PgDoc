@@ -47,7 +47,7 @@ namespace PgDoc.Serialization.Tests
 
             Assert.Equal(guid, document.Id);
             Assert.Equal(ByteString.Parse("abcd"), document.Version);
-            Assert.Equal(@"{""StringValue"":""value"",""Int64Value"":100,""DecimalValue"":100.001,""ByteValue"":""q83vASNFZ4k="",""DateValue"":1275710582}", document.Body);
+            Assert.Equal(@"{""StringValue"":""value"",""Int64Value"":100,""DecimalValue"":100.001,""ByteValue"":""q83vASNFZ4k="",""NullableDateValue"":null,""DateValue"":1275710582}", document.Body);
 
             Assert.Equal(guid, result.Id.Value);
             Assert.Equal(ByteString.Parse("abcd"), result.Version);
@@ -55,6 +55,7 @@ namespace PgDoc.Serialization.Tests
             Assert.Equal(100, result.Entity.Int64Value);
             Assert.Equal(100.001m, result.Entity.DecimalValue);
             Assert.Equal(ByteString.Parse("abcdef0123456789"), result.Entity.ByteValue);
+            Assert.Null(result.Entity.NullableDateValue);
             Assert.Equal(new DateTime(2010, 6, 5, 4, 3, 2), result.Entity.DateValue);
         }
 
@@ -158,7 +159,9 @@ namespace PgDoc.Serialization.Tests
 
             public ByteString ByteValue { get; set; }
 
-            public DateTime? DateValue { get; set; }
+            public DateTime? NullableDateValue { get; set; }
+
+            public DateTime DateValue { get; set; }
         }
     }
 }

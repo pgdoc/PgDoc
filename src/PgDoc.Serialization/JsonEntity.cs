@@ -58,11 +58,5 @@ namespace PgDoc.Serialization
         {
             return new JsonEntity<T>(EntityId.New(type), value, ByteString.Empty);
         }
-
-        public override string ToString()
-        {
-            string json = JsonConvert.SerializeObject(this, JsonSettings.Settings);
-            return $"({Id.Value.ToString()}, {Version.ToString()}) =>\n{json}";
-        }
     }
 }
