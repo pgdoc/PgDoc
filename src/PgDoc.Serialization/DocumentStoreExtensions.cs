@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PgDoc.Serialization
@@ -22,8 +21,8 @@ namespace PgDoc.Serialization
         public static async Task<JsonEntity<T>> GetEntity<T>(this IDocumentStore documentStore, EntityId id)
             where T : class
         {
-            IReadOnlyList<Document> result = await documentStore.GetDocuments(new[] { id.Value });
-            return JsonEntity<T>.FromDocument(result[0]);
+            Document result = await documentStore.GetDocument(id.Value);
+            return JsonEntity<T>.FromDocument(result);
         }
     }
 }
