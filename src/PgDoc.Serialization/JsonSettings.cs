@@ -26,7 +26,8 @@ namespace PgDoc.Serialization
             List<JsonConverter> converters = new List<JsonConverter>()
             {
                 new UnixTimeConverter(),
-                new ByteStringConverter()
+                new ByteStringConverter(),
+                new EntityIdConverter()
             };
 
             Settings = new JsonSerializerSettings()

@@ -20,6 +20,7 @@ namespace PgDoc.Serialization.Tests
     public class JsonEntityTests
     {
         private static readonly Guid guid = Guid.Parse("f81428a9-0bd9-4d75-95bf-976225f24cf1");
+        private static readonly EntityId entityId = new EntityId(Guid.Parse("000a9d4a-78a1-4534-963a-37f1023a4022"));
 
         [Fact]
         public void Constructor_Exception()
@@ -37,7 +38,8 @@ namespace PgDoc.Serialization.Tests
                 Int64Value = 100,
                 DecimalValue = 100.001m,
                 ByteValue = ByteString.Parse("abcdef0123456789"),
-                DateValue = new DateTime(2010, 6, 5, 4, 3, 2, DateTimeKind.Utc)
+                DateValue = new DateTime(2010, 6, 5, 4, 3, 2, DateTimeKind.Utc),
+                EntityId = entityId
             };
 
             JsonEntity<TestObject> entity = new JsonEntity<TestObject>(new EntityId(guid), testObject, ByteString.Parse("abcd"));
@@ -47,7 +49,7 @@ namespace PgDoc.Serialization.Tests
 
             Assert.Equal(guid, document.Id);
             Assert.Equal(ByteString.Parse("abcd"), document.Version);
-            Assert.Equal(@"{""StringValue"":""value"",""Int64Value"":100,""DecimalValue"":100.001,""ByteValue"":""q83vASNFZ4k="",""NullableDateValue"":null,""DateValue"":1275710582}", document.Body);
+            Assert.Equal(@"{""StringValue"":""value"",""Int64Value"":100,""DecimalValue"":100.001,""ByteValue"":""q83vASNFZ4k="",""NullableDateValue"":null,""DateValue"":1275710582,""EntityId"":""000a9d4a-78a1-4534-963a-37f1023a4022""}", document.Body);
 
             Assert.Equal(guid, result.Id.Value);
             Assert.Equal(ByteString.Parse("abcd"), result.Version);
@@ -55,12 +57,12 @@ namespace PgDoc.Serialization.Tests
             Assert.Equal(100, result.Entity.Int64Value);
             Assert.Equal(100.001m, result.Entity.DecimalValue);
             Assert.Equal(ByteString.Parse("abcdef0123456789"), result.Entity.ByteValue);
-            Assert.Null(result.Entity.NullableDateValue);
             Assert.Equal(new DateTime(2010, 6, 5, 4, 3, 2), result.Entity.DateValue);
+            Assert.Equal(entityId, result.Entity.EntityId);
         }
 
         [Fact]
-        public void FromDocument_Null()
+        public void FromDocument_NullDocument()
         {
             JsonEntity<TestObject> entity = new JsonEntity<TestObject>(new EntityId(guid), null, ByteString.Parse("abcd"));
 
@@ -74,6 +76,28 @@ namespace PgDoc.Serialization.Tests
             Assert.Equal(guid, result.Id.Value);
             Assert.Equal(ByteString.Parse("abcd"), result.Version);
             Assert.Null(result.Entity);
+        }
+
+        [Fact]
+        public void FromDocument_NullValues()
+        {
+            TestObject testObject = new TestObject();
+
+            JsonEntity<TestObject> entity = new JsonEntity<TestObject>(new EntityId(guid), testObject, ByteString.Parse("abcd"));
+
+            Document document = entity.AsDocument();
+            JsonEntity<TestObject> result = JsonEntity<TestObject>.FromDocument(document);
+
+            Assert.Equal(guid, document.Id);
+            Assert.Equal(ByteString.Parse("abcd"), document.Version);
+            Assert.Equal(@"{""StringValue"":null,""Int64Value"":0,""DecimalValue"":0.0,""ByteValue"":null,""NullableDateValue"":null,""DateValue"":-62135596800,""EntityId"":null}", document.Body);
+
+            Assert.Equal(guid, result.Id.Value);
+            Assert.Equal(ByteString.Parse("abcd"), result.Version);
+            Assert.Null(result.Entity.StringValue);
+            Assert.Null(result.Entity.ByteValue);
+            Assert.Null(result.Entity.NullableDateValue);
+            Assert.Null(result.Entity.EntityId);
         }
 
         [Theory]
@@ -162,6 +186,8 @@ namespace PgDoc.Serialization.Tests
             public DateTime? NullableDateValue { get; set; }
 
             public DateTime DateValue { get; set; }
+
+            public EntityId EntityId { get; set; }
         }
     }
 }
