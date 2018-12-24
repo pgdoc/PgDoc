@@ -21,7 +21,8 @@ namespace PgDoc.Serialization
 {
     public class EntityId : IEquatable<EntityId?>
     {
-        private static readonly ThreadLocal<RandomNumberGenerator> random = new ThreadLocal<RandomNumberGenerator>(() => RandomNumberGenerator.Create());
+        private static readonly ThreadLocal<RandomNumberGenerator> random =
+            new ThreadLocal<RandomNumberGenerator>(() => RandomNumberGenerator.Create());
 
         public EntityId(Guid id)
         {

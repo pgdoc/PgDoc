@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace PgDoc.Serialization
 {
-    public readonly struct EntityType
+    public readonly struct EntityType : IEquatable<EntityType>
     {
         public EntityType(short value)
         {
@@ -22,5 +24,30 @@ namespace PgDoc.Serialization
         }
 
         public short Value { get; }
+
+        public bool Equals(EntityType other)
+        {
+            return Value == other.Value;
+        }
+
+        public override bool Equals(object other)
+        {
+            return (other is EntityType otherEntityType) && Equals(otherEntityType);
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+
+        public static bool operator ==(EntityType left, EntityType right)
+        {
+            return left.Value == right.Value;
+        }
+
+        public static bool operator !=(EntityType left, EntityType right)
+        {
+            return left.Value != right.Value;
+        }
     }
 }

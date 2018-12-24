@@ -29,8 +29,36 @@ namespace PgDoc.Serialization.Tests
         [Fact]
         public void Equals_Success()
         {
-            Assert.NotEqual(new EntityType(1), new EntityType(2));
-            Assert.Equal(new EntityType(1), new EntityType(1));
+            Assert.True(new EntityType(1).Equals(new EntityType(1)));
+            Assert.False(new EntityType(1).Equals(new EntityType(2)));
+            Assert.True(((object)new EntityType(1)).Equals(new EntityType(1)));
+            Assert.False(new EntityType(1).Equals("string"));
+            Assert.False(new EntityType(1).Equals(null));
+        }
+
+        [Fact]
+        public void GetHashCode_Success()
+        {
+            EntityType value1 = new EntityType(1);
+            EntityType value2 = new EntityType(2);
+            EntityType value3 = new EntityType(1);
+
+            Assert.Equal(value1.GetHashCode(), value3.GetHashCode());
+            Assert.NotEqual(value1.GetHashCode(), value2.GetHashCode());
+        }
+
+        [Fact]
+        public void Equality_Success()
+        {
+            Assert.True(new EntityType(1) == new EntityType(1));
+            Assert.False(new EntityType(1) == new EntityType(2));
+        }
+
+        [Fact]
+        public void Inequality_Success()
+        {
+            Assert.False(new EntityType(1) != new EntityType(1));
+            Assert.True(new EntityType(1) != new EntityType(2));
         }
     }
 }
