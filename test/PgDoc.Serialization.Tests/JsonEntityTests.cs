@@ -58,6 +58,7 @@ namespace PgDoc.Serialization.Tests
             Assert.Equal(100.001m, result.Entity.DecimalValue);
             Assert.Equal(ByteString.Parse("abcdef0123456789"), result.Entity.ByteValue);
             Assert.Equal(new DateTime(2010, 6, 5, 4, 3, 2), result.Entity.DateValue);
+            Assert.Equal(DateTimeKind.Utc, result.Entity.DateValue.Kind);
             Assert.Equal(entityId, result.Entity.EntityId);
         }
 
