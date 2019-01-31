@@ -58,5 +58,12 @@ namespace PgDoc.Serialization
         {
             return new JsonEntity<T>(EntityId.New(type), value, ByteString.Empty);
         }
+
+        public void Deconstruct(out EntityId id, out T? entity, out ByteString version)
+        {
+            id = this.Id;
+            entity = this.Entity;
+            version = this.Version;
+        }
     }
 }

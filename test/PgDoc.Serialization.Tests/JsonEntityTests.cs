@@ -174,6 +174,23 @@ namespace PgDoc.Serialization.Tests
             Assert.Equal(ByteString.Parse("abcd"), result.Version);
         }
 
+        [Fact]
+        public void Deconstruct_Success()
+        {
+            TestObject testObject = new TestObject()
+            {
+                StringValue = "abcd"
+            };
+
+            JsonEntity<TestObject> jsonEntity = new JsonEntity<TestObject>(new EntityId(guid), testObject, ByteString.Parse("abcd"));
+
+            (EntityId id, TestObject entity, ByteString version) = jsonEntity;
+
+            Assert.Equal(new EntityId(guid), id);
+            Assert.Equal("abcd", entity.StringValue);
+            Assert.Equal(ByteString.Parse("abcd"), version);
+        }
+
         public class TestObject
         {
             public string StringValue { get; set; }
