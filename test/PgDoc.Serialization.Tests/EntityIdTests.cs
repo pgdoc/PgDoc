@@ -52,7 +52,7 @@ namespace PgDoc.Serialization.Tests
         [Fact]
         public void ToString_Success()
         {
-            EntityId value = new EntityId(Guid.Parse(_guid));
+            EntityId value = EntityId.Parse(_guid);
 
             Assert.Equal(_guid, value.ToString());
         }

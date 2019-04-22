@@ -51,6 +51,11 @@ namespace PgDoc.Serialization
             return new EntityId(new Guid(data));
         }
 
+        public static EntityId Parse(string input)
+        {
+            return new EntityId(Guid.Parse(input));
+        }
+
         public EntityId WithType(EntityType type)
         {
             byte[] data = Value.ToByteArray();
