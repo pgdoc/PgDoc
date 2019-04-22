@@ -20,7 +20,7 @@ namespace PgDoc.Serialization
     {
         public EntityType(short value)
         {
-            this.Value = value;
+            Value = value;
         }
 
         public short Value { get; }

@@ -21,14 +21,14 @@ namespace PgDoc.Serialization
 {
     public class EntityId : IEquatable<EntityId?>
     {
-        private static readonly ThreadLocal<RandomNumberGenerator> random =
+        private static readonly ThreadLocal<RandomNumberGenerator> _random =
             new ThreadLocal<RandomNumberGenerator>(() => RandomNumberGenerator.Create());
 
         public EntityId(Guid id)
         {
-            this.Value = id;
+            Value = id;
             byte[] byteArray = id.ToByteArray();
-            this.Type = new EntityType((short)((byteArray[3] << 8) | byteArray[2]));
+            Type = new EntityType((short)((byteArray[3] << 8) | byteArray[2]));
         }
 
         public Guid Value { get; }
@@ -43,7 +43,7 @@ namespace PgDoc.Serialization
         public static EntityId New(short type)
         {
             byte[] data = new byte[16];
-            random.Value.GetBytes(data);
+            _random.Value.GetBytes(data);
 
             data[2] = (byte)(type & 0xFF);
             data[3] = (byte)(type >> 8);
@@ -72,22 +72,22 @@ namespace PgDoc.Serialization
 
         public bool Equals(EntityId? other)
         {
-            return other != null && this.Value.Equals(other.Value);
+            return other != null && Value.Equals(other.Value);
         }
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as EntityId);
+            return Equals(obj as EntityId);
         }
 
         public override int GetHashCode()
         {
-            return this.Value.GetHashCode();
+            return Value.GetHashCode();
         }
 
         public override string ToString()
         {
-            return this.Value.ToString();
+            return Value.ToString();
         }
     }
 }

@@ -19,22 +19,22 @@ namespace PgDoc.Serialization.Tests
 {
     public class DocumentStoreExtensionsTests
     {
-        private readonly EntityId entityId = EntityId.New(new EntityType(1));
-        private readonly TestDocumentStore store;
+        private readonly EntityId _entityId = EntityId.New(new EntityType(1));
+        private readonly TestDocumentStore _store;
 
         public DocumentStoreExtensionsTests()
         {
-            store = new TestDocumentStore();
+            _store = new TestDocumentStore();
         }
 
         [Fact]
         public async Task GetEntity_Found()
         {
-            ByteString version = await store.UpdateDocument(entityId.Value, "'Value'", ByteString.Empty);
+            ByteString version = await _store.UpdateDocument(_entityId.Value, "'Value'", ByteString.Empty);
 
-            JsonEntity<string> entity = await store.GetEntity<string>(entityId);
+            JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
 
-            Assert.Equal(entityId, entity.Id);
+            Assert.Equal(_entityId, entity.Id);
             Assert.Equal("Value", entity.Entity);
             Assert.Equal(version, entity.Version);
         }
@@ -42,9 +42,9 @@ namespace PgDoc.Serialization.Tests
         [Fact]
         public async Task GetEntity_NotFound()
         {
-            JsonEntity<string> entity = await store.GetEntity<string>(entityId);
+            JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
 
-            Assert.Equal(entityId, entity.Id);
+            Assert.Equal(_entityId, entity.Id);
             Assert.Null(entity.Entity);
             Assert.Equal(ByteString.Empty, entity.Version);
         }

@@ -19,7 +19,7 @@ namespace PgDoc.Serialization.Tests
 {
     public class EntityIdTests
     {
-        private readonly string guid = "d31b6b50-fda9-11e8-b568-0800200c9a66";
+        private readonly string _guid = "d31b6b50-fda9-11e8-b568-0800200c9a66";
 
         [Theory]
         [InlineData((short)0)]
@@ -52,9 +52,9 @@ namespace PgDoc.Serialization.Tests
         [Fact]
         public void ToString_Success()
         {
-            EntityId value = new EntityId(Guid.Parse(guid));
+            EntityId value = new EntityId(Guid.Parse(_guid));
 
-            Assert.Equal(guid, value.ToString());
+            Assert.Equal(_guid, value.ToString());
         }
 
         [Fact]

@@ -19,7 +19,7 @@ namespace PgDoc.Serialization
 {
     public class UnixTimeConverter : JsonConverter
     {
-        private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime _epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
         public override bool CanConvert(Type objectType)
         {
@@ -35,7 +35,7 @@ namespace PgDoc.Serialization
             else
             {
                 long encodedData = (long)reader.Value;
-                return epoch + TimeSpan.FromSeconds(encodedData);
+                return _epoch + TimeSpan.FromSeconds(encodedData);
             }
         }
 
@@ -48,7 +48,7 @@ namespace PgDoc.Serialization
 
         public static long FromDate(DateTime date)
         {
-            return (long)(date - epoch).TotalSeconds;
+            return (long)(date - _epoch).TotalSeconds;
         }
     }
 }

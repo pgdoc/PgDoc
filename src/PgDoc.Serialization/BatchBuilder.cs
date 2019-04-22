@@ -20,13 +20,13 @@ namespace PgDoc.Serialization
 {
     public class BatchBuilder
     {
-        private readonly IDocumentStore dataStore;
-        private readonly Dictionary<Guid, Document> checkedDocuments = new Dictionary<Guid, Document>();
-        private readonly Dictionary<Guid, Document> modifiedDocuments = new Dictionary<Guid, Document>();
+        private readonly IDocumentStore _dataStore;
+        private readonly Dictionary<Guid, Document> _checkedDocuments = new Dictionary<Guid, Document>();
+        private readonly Dictionary<Guid, Document> _modifiedDocuments = new Dictionary<Guid, Document>();
 
         public BatchBuilder(IDocumentStore store)
         {
-            this.dataStore = store ?? throw new ArgumentNullException(nameof(store));
+            _dataStore = store ?? throw new ArgumentNullException(nameof(store));
         }
 
         public void Check(params Document[] documents)
@@ -36,14 +36,14 @@ namespace PgDoc.Serialization
             // Validation phase
             foreach (Document document in documents)
             {
-                if (checkedDocuments.TryGetValue(document.Id, out Document existingDocument))
+                if (_checkedDocuments.TryGetValue(document.Id, out Document existingDocument))
                 {
                     if (existingDocument.Version.Equals(document.Version))
                         continue;
                     else
                         throw new InvalidOperationException($"A different version of document {document.Id} is already being checked.");
                 }
-                else if (modifiedDocuments.TryGetValue(document.Id, out existingDocument))
+                else if (_modifiedDocuments.TryGetValue(document.Id, out existingDocument))
                 {
                     if (existingDocument.Version.Equals(document.Version))
                         continue;
@@ -55,7 +55,7 @@ namespace PgDoc.Serialization
             }
 
             foreach (Document document in addCheckDocuments)
-                this.checkedDocuments.Add(document.Id, document);
+                _checkedDocuments.Add(document.Id, document);
         }
 
         public void Check<T>(JsonEntity<T> document)
@@ -72,14 +72,14 @@ namespace PgDoc.Serialization
             // Validation phase
             foreach (Document document in documents)
             {
-                if (checkedDocuments.TryGetValue(document.Id, out Document existingDocument))
+                if (_checkedDocuments.TryGetValue(document.Id, out Document existingDocument))
                 {
                     if (existingDocument.Version.Equals(document.Version))
                         removeCheckedDocuments.Add(document.Id);
                     else
                         throw new InvalidOperationException($"A different version of document {document.Id} is already being checked.");
                 }
-                else if (modifiedDocuments.TryGetValue(document.Id, out existingDocument))
+                else if (_modifiedDocuments.TryGetValue(document.Id, out existingDocument))
                 {
                     throw new InvalidOperationException($"Document {document.Id} is already being modified.");
                 }
@@ -88,10 +88,10 @@ namespace PgDoc.Serialization
             }
 
             foreach (Guid remove in removeCheckedDocuments)
-                this.checkedDocuments.Remove(remove);
+                _checkedDocuments.Remove(remove);
 
             foreach (Document document in addModifyDocuments)
-                this.modifiedDocuments.Add(document.Id, document);
+                _modifiedDocuments.Add(document.Id, document);
         }
 
         public void Modify<T>(JsonEntity<T> document)
@@ -102,10 +102,10 @@ namespace PgDoc.Serialization
 
         public async Task<ByteString> Submit()
         {
-            ByteString result = await this.dataStore.UpdateDocuments(modifiedDocuments.Values, checkedDocuments.Values);
+            ByteString result = await _dataStore.UpdateDocuments(_modifiedDocuments.Values, _checkedDocuments.Values);
 
-            checkedDocuments.Clear();
-            modifiedDocuments.Clear();
+            _checkedDocuments.Clear();
+            _modifiedDocuments.Clear();
 
             return result;
         }

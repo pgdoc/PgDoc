@@ -22,9 +22,9 @@ namespace PgDoc.Serialization
     {
         public JsonEntity(EntityId id, T? entity, ByteString version)
         {
-            this.Id = id;
-            this.Entity = entity;
-            this.Version = version ?? throw new ArgumentNullException(nameof(version));
+            Id = id;
+            Entity = entity;
+            Version = version ?? throw new ArgumentNullException(nameof(version));
         }
 
         public EntityId Id { get; }
@@ -37,7 +37,7 @@ namespace PgDoc.Serialization
         {
             return new Document(
                 Id.Value,
-                this.Entity == null ? null : JsonConvert.SerializeObject(this.Entity, JsonSettings.Settings),
+                Entity == null ? null : JsonConvert.SerializeObject(Entity, JsonSettings.Settings),
                 Version);
         }
 
@@ -61,9 +61,9 @@ namespace PgDoc.Serialization
 
         public void Deconstruct(out EntityId id, out T? entity, out ByteString version)
         {
-            id = this.Id;
-            entity = this.Entity;
-            version = this.Version;
+            id = Id;
+            entity = Entity;
+            version = Version;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace PgDoc.Serialization.Tests
 {
     public class TestDocumentStore : IDocumentStore
     {
-        private byte currentVersion = 0;
+        private byte _currentVersion = 0;
 
         public IDictionary<Guid, Tuple<string, ByteString>> Store { get; } = new Dictionary<Guid, Tuple<string, ByteString>>();
 
@@ -53,7 +53,7 @@ namespace PgDoc.Serialization.Tests
                     throw new UpdateConflictException(document.Id, document.Version);
             }
 
-            ByteString newVersion = GetVersionNumber(currentVersion++);
+            ByteString newVersion = GetVersionNumber(_currentVersion++);
 
             foreach (Document document in updatedDocuments)
             {
