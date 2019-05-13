@@ -58,7 +58,7 @@ namespace PgDoc.Serialization
                 _checkedDocuments.Add(document.Id, document);
         }
 
-        public void Check<T>(JsonEntity<T> document)
+        public void Check<T>(IJsonEntity<T> document)
             where T : class
         {
             Check(document.AsDocument());
@@ -94,7 +94,7 @@ namespace PgDoc.Serialization
                 _modifiedDocuments.Add(document.Id, document);
         }
 
-        public void Modify<T>(JsonEntity<T> document)
+        public void Modify<T>(IJsonEntity<T> document)
             where T : class
         {
             Modify(document.AsDocument());

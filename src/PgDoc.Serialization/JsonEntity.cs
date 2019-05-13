@@ -17,7 +17,7 @@ using Newtonsoft.Json;
 
 namespace PgDoc.Serialization
 {
-    public class JsonEntity<T>
+    public class JsonEntity<T> : IJsonEntity<T>
         where T : class
     {
         public JsonEntity(EntityId id, T? entity, ByteString version)
@@ -32,14 +32,6 @@ namespace PgDoc.Serialization
         public ByteString Version { get; }
 
         public T? Entity { get; }
-
-        public Document AsDocument()
-        {
-            return new Document(
-                Id.Value,
-                Entity == null ? null : JsonConvert.SerializeObject(Entity, JsonSettings.Settings),
-                Version);
-        }
 
         public static JsonEntity<T> FromDocument(Document document)
         {
