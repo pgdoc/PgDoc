@@ -23,13 +23,6 @@ namespace PgDoc.Serialization.Tests
         private static readonly EntityId _entityId = new EntityId(Guid.Parse("000a9d4a-78a1-4534-963a-37f1023a4022"));
 
         [Fact]
-        public void Constructor_Exception()
-        {
-            Assert.Throws<ArgumentNullException>(
-                () => new JsonEntity<string>(new EntityId(_guid), "abc", null));
-        }
-
-        [Fact]
         public void FromDocument_Success()
         {
             TestObject testObject = new TestObject()
@@ -38,7 +31,9 @@ namespace PgDoc.Serialization.Tests
                 Int64Value = 100,
                 DecimalValue = 100.001m,
                 ByteValue = ByteString.Parse("abcdef0123456789"),
+                NullableByteValue = ByteString.Parse("abcd"),
                 DateValue = new DateTime(2010, 6, 5, 4, 3, 2, DateTimeKind.Utc),
+                NullableDateValue = new DateTime(2011, 9, 8, 7, 5, 4, DateTimeKind.Utc),
                 EntityId = _entityId
             };
 
@@ -49,7 +44,7 @@ namespace PgDoc.Serialization.Tests
 
             Assert.Equal(_guid, document.Id);
             Assert.Equal(ByteString.Parse("abcd"), document.Version);
-            Assert.Equal(@"{""StringValue"":""value"",""Int64Value"":100,""DecimalValue"":100.001,""ByteValue"":""q83vASNFZ4k="",""NullableDateValue"":null,""DateValue"":1275710582,""EntityId"":""000a9d4a-78a1-4534-963a-37f1023a4022""}", document.Body);
+            Assert.Equal(@"{""StringValue"":""value"",""Int64Value"":100,""DecimalValue"":100.001,""NullableByteValue"":""q80="",""ByteValue"":""q83vASNFZ4k="",""NullableDateValue"":1315465504,""DateValue"":1275710582,""EntityId"":""000a9d4a-78a1-4534-963a-37f1023a4022""}", document.Body);
 
             Assert.Equal(_guid, result.Id.Value);
             Assert.Equal(ByteString.Parse("abcd"), result.Version);
@@ -91,12 +86,12 @@ namespace PgDoc.Serialization.Tests
 
             Assert.Equal(_guid, document.Id);
             Assert.Equal(ByteString.Parse("abcd"), document.Version);
-            Assert.Equal(@"{""StringValue"":null,""Int64Value"":0,""DecimalValue"":0.0,""ByteValue"":null,""NullableDateValue"":null,""DateValue"":-62135596800,""EntityId"":null}", document.Body);
+            Assert.Equal(@"{""StringValue"":null,""Int64Value"":0,""DecimalValue"":0.0,""NullableByteValue"":null,""ByteValue"":"""",""NullableDateValue"":null,""DateValue"":-62135596800,""EntityId"":null}", document.Body);
 
             Assert.Equal(_guid, result.Id.Value);
             Assert.Equal(ByteString.Parse("abcd"), result.Version);
             Assert.Null(result.Entity.StringValue);
-            Assert.Null(result.Entity.ByteValue);
+            Assert.Null(result.Entity.NullableByteValue);
             Assert.Null(result.Entity.NullableDateValue);
             Assert.Null(result.Entity.EntityId);
         }
@@ -198,6 +193,8 @@ namespace PgDoc.Serialization.Tests
             public long Int64Value { get; set; }
 
             public decimal DecimalValue { get; set; }
+
+            public ByteString? NullableByteValue { get; set; }
 
             public ByteString ByteValue { get; set; }
 
