@@ -12,12 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PgDoc.Serialization
 {
     public static class DocumentStoreExtensions
     {
+        /// <summary>
+        /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
+        /// </summary>
+        public static async Task<ByteString> UpdateEntities(
+            this IDocumentStore documentStore,
+            IEnumerable<IJsonEntity<object>> updatedDocuments,
+            IEnumerable<IJsonEntity<object>> checkedDocuments)
+        {
+            return await documentStore.UpdateDocuments(
+                updatedDocuments.Select(JsonEntityExtensions.AsDocument),
+                checkedDocuments.Select(JsonEntityExtensions.AsDocument));
+        }
+
+        /// <summary>
+        /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
+        /// </summary>
+        public static async Task<ByteString> UpdateEntities(
+            this IDocumentStore documentStore,
+            params IJsonEntity<object>[] updatedDocuments)
+        {
+            return await documentStore.UpdateEntities(updatedDocuments, Array.Empty<IJsonEntity<object>>());
+        }
+
+        /// <summary>
+        /// Retrieves a document given its ID, represented as a <see cref="JsonEntity{T}"/> object.
+        /// </summary>
         public static async Task<JsonEntity<T>> GetEntity<T>(this IDocumentStore documentStore, EntityId id)
             where T : class
         {

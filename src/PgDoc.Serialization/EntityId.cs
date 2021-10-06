@@ -19,6 +19,9 @@ using System.Threading;
 
 namespace PgDoc.Serialization
 {
+    /// <summary>
+    /// Encapsulates a <see cref="Guid"/> object whose first 16 bits are used to represent an entity type.
+    /// </summary>
     public class EntityId : IEquatable<EntityId?>
     {
         private static readonly ThreadLocal<RandomNumberGenerator> _random =
@@ -31,15 +34,27 @@ namespace PgDoc.Serialization
             Type = new EntityType((short)((byteArray[3] << 8) | byteArray[2]));
         }
 
+        /// <summary>
+        /// Gets the <see cref="Guid"/> representation of this <see cref="EntityId"/> object.
+        /// </summary>
         public Guid Value { get; }
 
+        /// <summary>
+        /// Gets the type of the entity represented by this <see cref="EntityId"/> object.
+        /// </summary>
         public EntityType Type { get; }
 
+        /// <summary>
+        /// Generates a random <see cref="EntityId"/> value with the specified entity type.
+        /// </summary>
         public static EntityId New(EntityType type)
         {
             return New(type.Value);
         }
 
+        /// <summary>
+        /// Generates a random <see cref="EntityId"/> value with the specified entity type.
+        /// </summary>
         public static EntityId New(short type)
         {
             byte[] data = new byte[16];
@@ -51,11 +66,19 @@ namespace PgDoc.Serialization
             return new EntityId(new Guid(data));
         }
 
+        /// <summary>
+        /// Parses an <see cref="EntityId"/> object from a string value.
+        /// </summary>
         public static EntityId Parse(string input)
         {
             return new EntityId(Guid.Parse(input));
         }
 
+        /// <summary>
+        /// Returns a copy of this <see cref="EntityId"/> object with a different entity type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public EntityId WithType(EntityType type)
         {
             byte[] data = Value.ToByteArray();
@@ -66,6 +89,12 @@ namespace PgDoc.Serialization
             return new EntityId(new Guid(data));
         }
 
+        /// <summary>
+        /// Generates an <see cref="EntityId"/> object from a string value and a type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static EntityId FromString(EntityType type, string value)
         {
             using (MD5 md5 = MD5.Create())
