@@ -134,7 +134,7 @@ namespace PgDoc.Serialization.Tests
         }
 
         [Fact]
-        public void Create_Success()
+        public void Create_ExplicitType()
         {
             TestObject testObject = new TestObject()
             {
@@ -144,6 +144,21 @@ namespace PgDoc.Serialization.Tests
             JsonEntity<TestObject> result = JsonEntity<TestObject>.Create(testObject, new EntityType(1));
 
             Assert.Equal(1, result.Id.Type.Value);
+            Assert.Equal(testObject, result.Entity);
+            Assert.Equal(ByteString.Empty, result.Version);
+        }
+
+        [Fact]
+        public void Create_UseAttribute()
+        {
+            TestObject testObject = new TestObject()
+            {
+                Int64Value = 100
+            };
+
+            JsonEntity<TestObject> result = JsonEntity<TestObject>.Create(testObject);
+
+            Assert.Equal(5, result.Id.Type.Value);
             Assert.Equal(testObject, result.Entity);
             Assert.Equal(ByteString.Empty, result.Version);
         }
@@ -186,6 +201,7 @@ namespace PgDoc.Serialization.Tests
             Assert.Equal(ByteString.Parse("abcd"), version);
         }
 
+        [JsonEntityType(5)]
         public class TestObject
         {
             public string StringValue { get; set; }

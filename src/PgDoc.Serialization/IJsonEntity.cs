@@ -1,7 +1,7 @@
 ﻿namespace PgDoc.Serialization
 {
     /// <summary>
-    ///  Represents a document comprised of a unique ID, a deserialized JSON body and a version.
+    ///  Represents a document composed of a unique ID, a deserialized JSON body and a version.
     /// </summary>
     /// <typeparam name="T">The type used to deserialize the JSON body of the document.</typeparam>
     public interface IJsonEntity<out T>

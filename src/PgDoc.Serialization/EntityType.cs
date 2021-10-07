@@ -13,9 +13,13 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 
 namespace PgDoc.Serialization
 {
+    /// <summary>
+    /// Represents a value that identifies the type of a JSON entity.
+    /// </summary>
     public readonly struct EntityType : IEquatable<EntityType>
     {
         public EntityType(short value)
@@ -24,6 +28,18 @@ namespace PgDoc.Serialization
         }
 
         public short Value { get; }
+
+        public static EntityType GetEntityType<T>()
+        {
+            object[] customAttributes = typeof(T).GetCustomAttributes(typeof(JsonEntityTypeAttribute), true);
+
+            JsonEntityTypeAttribute attribute = customAttributes.OfType<JsonEntityTypeAttribute>().FirstOrDefault();
+
+            if (attribute == null)
+                throw new ArgumentException($"The type {typeof(T).Name} does not have a JsonEntityType attribute.", nameof(T));
+
+            return new EntityType(attribute.EntityType);
+        }
 
         public bool Equals(EntityType other)
         {

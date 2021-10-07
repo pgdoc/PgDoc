@@ -17,7 +17,7 @@ using Newtonsoft.Json;
 namespace PgDoc.Serialization
 {
     /// <summary>
-    ///  Represents a document comprised of a unique ID, a deserialized JSON body and a version.
+    ///  Represents a document composed of a unique ID, a deserialized JSON body and a version.
     /// </summary>
     /// <typeparam name="T">The type used to deserialize the JSON body of the document.</typeparam>
     public class JsonEntity<T> : IJsonEntity<T>
@@ -74,7 +74,15 @@ namespace PgDoc.Serialization
         }
 
         /// <summary>
-        /// Deconstructs the ID, body and version of the <see cref="JsonEntity{T}"/> object.
+        /// Creates a new <see cref="JsonEntity{T}"/> object with a new random ID and a version set to zero.
+        /// </summary>
+        public static JsonEntity<T> Create(T value)
+        {
+            return Create(value, EntityType.GetEntityType<T>());
+        }
+
+        /// <summary>
+        /// Deconstructs the ID, body and version of this <see cref="JsonEntity{T}"/> object.
         /// </summary>
         public void Deconstruct(out EntityId id, out T? entity, out ByteString version)
         {

@@ -20,7 +20,7 @@ using System.Threading;
 namespace PgDoc.Serialization
 {
     /// <summary>
-    /// Encapsulates a <see cref="Guid"/> object whose first 16 bits are used to represent an entity type.
+    /// Represents a <see cref="Guid"/> object whose first 16 bits are used to represent an entity type.
     /// </summary>
     public class EntityId : IEquatable<EntityId?>
     {
@@ -77,8 +77,6 @@ namespace PgDoc.Serialization
         /// <summary>
         /// Returns a copy of this <see cref="EntityId"/> object with a different entity type.
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
         public EntityId WithType(EntityType type)
         {
             byte[] data = Value.ToByteArray();
@@ -87,6 +85,14 @@ namespace PgDoc.Serialization
             data[3] = (byte)(type.Value >> 8);
 
             return new EntityId(new Guid(data));
+        }
+
+        /// <summary>
+        /// Returns a copy of this <see cref="EntityId"/> object with a different entity type.
+        /// </summary>
+        public EntityId WithType<T>()
+        {
+            return WithType(EntityType.GetEntityType<T>());
         }
 
         /// <summary>

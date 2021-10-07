@@ -24,8 +24,8 @@ namespace PgDoc.Serialization
         /// <summary>
         /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
         /// </summary>
-        /// <exception cref="UpdateConflictException">Thrown when an attempt to modify a document is made using the
-        /// wrong base version.</exception>
+        /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
+        /// base version.</exception>
         public static async Task<ByteString> UpdateEntities(
             this IDocumentStore documentStore,
             IEnumerable<IJsonEntity<object>> updatedDocuments,
@@ -39,8 +39,8 @@ namespace PgDoc.Serialization
         /// <summary>
         /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
         /// </summary>
-        /// <exception cref="UpdateConflictException">Thrown when an attempt to modify a document is made using the
-        /// wrong base version.</exception>
+        /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
+        /// base version.</exception>
         public static async Task<ByteString> UpdateEntities(
             this IDocumentStore documentStore,
             params IJsonEntity<object>[] updatedDocuments)

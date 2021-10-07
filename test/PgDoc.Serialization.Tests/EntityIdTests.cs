@@ -36,6 +36,34 @@ namespace PgDoc.Serialization.Tests
         }
 
         [Fact]
+        public void New_Success()
+        {
+            EntityId result = EntityId.New(new EntityType(0x1234));
+
+            Assert.StartsWith("1234", result.Value.ToString());
+        }
+
+        [Fact]
+        public void WithType_ExplicitType()
+        {
+            EntityId entityId = new EntityId(Guid.Parse(_guid));
+
+            EntityId result = entityId.WithType(new EntityType(0x1234));
+
+            Assert.Equal("12346b50-fda9-11e8-b568-0800200c9a66", result.Value.ToString());
+        }
+
+        [Fact]
+        public void WithType_UseAttribute()
+        {
+            EntityId entityId = new EntityId(Guid.Parse(_guid));
+
+            EntityId result = entityId.WithType<TestObject>();
+
+            Assert.Equal("00056b50-fda9-11e8-b568-0800200c9a66", result.Value.ToString());
+        }
+
+        [Fact]
         public void FromString_Success()
         {
             EntityId value1 = EntityId.FromString(new EntityType(1), "a");
@@ -79,5 +107,9 @@ namespace PgDoc.Serialization.Tests
             Assert.Equal(value1.GetHashCode(), value3.GetHashCode());
             Assert.NotEqual(value1.GetHashCode(), value2.GetHashCode());
         }
+
+        [JsonEntityType(5)]
+        public class TestObject
+        { }
     }
 }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 
 namespace PgDoc.Serialization.Tests
@@ -24,6 +25,23 @@ namespace PgDoc.Serialization.Tests
             EntityType entityType = new EntityType(10);
 
             Assert.Equal(10, entityType.Value);
+        }
+
+        [Fact]
+        public void GetEntityType_Success()
+        {
+            EntityType entityType = EntityType.GetEntityType<TestEntity>();
+
+            Assert.Equal(4, entityType.Value);
+        }
+
+        [Fact]
+        public void GetEntityType_NoAttribute()
+        {
+            ArgumentException exception = Assert.Throws<ArgumentException>(
+                () => EntityType.GetEntityType<string>());
+
+            Assert.StartsWith("The type String does not have a JsonEntityType attribute. ", exception.Message);
         }
 
         [Fact]
@@ -59,6 +77,13 @@ namespace PgDoc.Serialization.Tests
         {
             Assert.False(new EntityType(1) != new EntityType(1));
             Assert.True(new EntityType(1) != new EntityType(2));
+        }
+
+        [Serializable]
+        [JsonEntityType(4)]
+        private class TestEntity
+        {
+            public string StringValue { get; set; }
         }
     }
 }
