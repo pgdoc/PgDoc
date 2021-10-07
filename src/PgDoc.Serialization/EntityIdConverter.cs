@@ -24,9 +24,9 @@ namespace PgDoc.Serialization
             return objectType == typeof(EntityId);
         }
 
-        public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
-            string encodedData = (string)reader.Value;
+            string? encodedData = (string?)reader.Value;
 
             if (encodedData == null)
             {
@@ -38,7 +38,7 @@ namespace PgDoc.Serialization
             }
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             EntityId data = (EntityId)value;
             writer.WriteValue(data.ToString());
