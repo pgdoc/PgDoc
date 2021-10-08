@@ -39,7 +39,7 @@ namespace PgDoc.Serialization
                     Document document = new Document(
                         (Guid)reader["id"],
                         (string)reader["body"],
-                        new ByteString((byte[])reader["version"]));
+                        (long)reader["version"]);
 
                     result.Add(JsonEntity<T>.FromDocument(document));
                 }

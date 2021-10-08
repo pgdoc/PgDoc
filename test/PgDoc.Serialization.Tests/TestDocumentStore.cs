@@ -23,7 +23,7 @@ namespace PgDoc.Serialization.Tests
     {
         private byte _currentVersion = 0;
 
-        public IDictionary<Guid, Tuple<string, ByteString>> Store { get; } = new Dictionary<Guid, Tuple<string, ByteString>>();
+        public IDictionary<Guid, Tuple<string, long>> Store { get; } = new Dictionary<Guid, Tuple<string, long>>();
 
         public Task Initialize()
         {
@@ -34,16 +34,16 @@ namespace PgDoc.Serialization.Tests
         {
             return Task.FromResult((IReadOnlyList<Document>)ids.Select(id =>
             {
-                if (Store.TryGetValue(id, out Tuple<string, ByteString> value))
+                if (Store.TryGetValue(id, out Tuple<string, long> value))
                     return new Document(id, value.Item1, value.Item2);
                 else
-                    return new Document(id, null, ByteString.Empty);
+                    return new Document(id, null, 0);
             })
             .ToList()
             .AsReadOnly());
         }
 
-        public async Task<ByteString> UpdateDocuments(IEnumerable<Document> updatedDocuments, IEnumerable<Document> checkedDocuments)
+        public async Task UpdateDocuments(IEnumerable<Document> updatedDocuments, IEnumerable<Document> checkedDocuments)
         {
             foreach (Document document in updatedDocuments.Concat(checkedDocuments))
             {
@@ -53,22 +53,13 @@ namespace PgDoc.Serialization.Tests
                     throw new UpdateConflictException(document.Id, document.Version);
             }
 
-            ByteString newVersion = GetVersionNumber(_currentVersion++);
-
             foreach (Document document in updatedDocuments)
             {
-                Store[document.Id] = Tuple.Create(document.Body, newVersion);
+                Store[document.Id] = Tuple.Create(document.Body, document.Version + 1);
             }
-
-            return newVersion;
         }
 
         public void Dispose()
         { }
-
-        public static ByteString GetVersionNumber(byte i)
-        {
-            return new ByteString(new byte[] { 0, i });
-        }
     }
 }

@@ -30,29 +30,29 @@ namespace PgDoc.Serialization.Tests
         [Fact]
         public async Task UpdateEntities_Update()
         {
-            ByteString version = await _store.UpdateEntities(new JsonEntity<string>(_entityId, "Value", ByteString.Empty));
+            await _store.UpdateEntities(new JsonEntity<string>(_entityId, "Value", 0));
 
             JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
 
             Assert.Equal(_entityId, entity.Id);
             Assert.Equal("Value", entity.Entity);
-            Assert.Equal(version, entity.Version);
+            Assert.Equal(1, entity.Version);
         }
 
         [Fact]
         public async Task UpdateEntities_Check()
         {
-            ByteString version = await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", ByteString.Empty));
+            await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
 
             await _store.UpdateEntities(
                 new IJsonEntity<object>[0],
-                new[] { new JsonEntity<string>(_entityId, null, version) });
+                new[] { new JsonEntity<string>(_entityId, null, 1) });
 
             JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
 
             Assert.Equal(_entityId, entity.Id);
             Assert.Equal("Value", entity.Entity);
-            Assert.Equal(version, entity.Version);
+            Assert.Equal(1, entity.Version);
         }
 
         [Fact]
@@ -61,29 +61,29 @@ namespace PgDoc.Serialization.Tests
             JsonEntity<string> entity1 = JsonEntity<string>.Create("Value", new EntityType(1));
             JsonEntity<int[]> entity2 = JsonEntity<int[]>.Create(new[] { 1, 2, 3 }, new EntityType(2));
 
-            ByteString version = await _store.UpdateEntities(entity1, entity2);
+            await _store.UpdateEntities(entity1, entity2);
 
             JsonEntity<string> result1 = await _store.GetEntity<string>(entity1.Id);
             JsonEntity<int[]> result2 = await _store.GetEntity<int[]>(entity2.Id);
 
             Assert.Equal(entity1.Id, result1.Id);
             Assert.Equal("Value", result1.Entity);
-            Assert.Equal(version, result1.Version);
+            Assert.Equal(1, result1.Version);
             Assert.Equal(entity2.Id, result2.Id);
             Assert.Equal(new int[] { 1, 2, 3 }, result2.Entity);
-            Assert.Equal(version, result2.Version);
+            Assert.Equal(1, result2.Version);
         }
 
         [Fact]
         public async Task GetEntity_Found()
         {
-            ByteString version = await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", ByteString.Empty));
+            await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
 
             JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
 
             Assert.Equal(_entityId, entity.Id);
             Assert.Equal("Value", entity.Entity);
-            Assert.Equal(version, entity.Version);
+            Assert.Equal(1, entity.Version);
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace PgDoc.Serialization.Tests
 
             Assert.Equal(_entityId, entity.Id);
             Assert.Null(entity.Entity);
-            Assert.Equal(ByteString.Empty, entity.Version);
+            Assert.Equal(0, entity.Version);
         }
     }
 }

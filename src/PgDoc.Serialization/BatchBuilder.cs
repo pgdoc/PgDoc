@@ -100,14 +100,12 @@ namespace PgDoc.Serialization
             Modify(document.AsDocument());
         }
 
-        public async Task<ByteString> Submit()
+        public async Task Submit()
         {
-            ByteString result = await _dataStore.UpdateDocuments(_modifiedDocuments.Values, _checkedDocuments.Values);
+            await _dataStore.UpdateDocuments(_modifiedDocuments.Values, _checkedDocuments.Values);
 
             _checkedDocuments.Clear();
             _modifiedDocuments.Clear();
-
-            return result;
         }
     }
 }

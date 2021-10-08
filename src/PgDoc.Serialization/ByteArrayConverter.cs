@@ -17,11 +17,11 @@ using Newtonsoft.Json;
 
 namespace PgDoc.Serialization
 {
-    public class ByteStringConverter : JsonConverter
+    public class ByteArrayConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(ByteString) || objectType == typeof(ByteString?);
+            return objectType == typeof(byte[]);
         }
 
         public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
@@ -34,16 +34,15 @@ namespace PgDoc.Serialization
             }
             else
             {
-                byte[] data = Convert.FromBase64String(encodedData);
-                return new ByteString(data);
+                return Convert.FromBase64String(encodedData);
             }
         }
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            ByteString data = (ByteString)value;
+            byte[] data = (byte[])value;
 
-            writer.WriteValue(Convert.ToBase64String(data.ToByteArray()));
+            writer.WriteValue(Convert.ToBase64String(data));
         }
     }
 }

@@ -26,12 +26,12 @@ namespace PgDoc.Serialization
         /// </summary>
         /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
         /// base version.</exception>
-        public static async Task<ByteString> UpdateEntities(
+        public static async Task UpdateEntities(
             this IDocumentStore documentStore,
             IEnumerable<IJsonEntity<object>> updatedDocuments,
             IEnumerable<IJsonEntity<object>> checkedDocuments)
         {
-            return await documentStore.UpdateDocuments(
+            await documentStore.UpdateDocuments(
                 updatedDocuments.Select(JsonEntityExtensions.AsDocument),
                 checkedDocuments.Select(JsonEntityExtensions.AsDocument));
         }
@@ -41,11 +41,11 @@ namespace PgDoc.Serialization
         /// </summary>
         /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
         /// base version.</exception>
-        public static async Task<ByteString> UpdateEntities(
+        public static async Task UpdateEntities(
             this IDocumentStore documentStore,
             params IJsonEntity<object>[] updatedDocuments)
         {
-            return await documentStore.UpdateEntities(updatedDocuments, Array.Empty<IJsonEntity<object>>());
+            await documentStore.UpdateEntities(updatedDocuments, Array.Empty<IJsonEntity<object>>());
         }
 
         /// <summary>

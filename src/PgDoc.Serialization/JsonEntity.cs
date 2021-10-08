@@ -17,13 +17,13 @@ using Newtonsoft.Json;
 namespace PgDoc.Serialization
 {
     /// <summary>
-    ///  Represents a document composed of a unique ID, a deserialized JSON body and a version.
+    ///  Represents a document composed of a unique ID, a deserialized JSON body and a version number.
     /// </summary>
     /// <typeparam name="T">The type used to deserialize the JSON body of the document.</typeparam>
     public class JsonEntity<T> : IJsonEntity<T>
         where T : class
     {
-        public JsonEntity(EntityId id, T? entity, ByteString version)
+        public JsonEntity(EntityId id, T? entity, long version)
         {
             Id = id;
             Entity = entity;
@@ -43,7 +43,7 @@ namespace PgDoc.Serialization
         /// /// <summary>
         /// Gets the current version of the document.
         /// </summary>
-        public ByteString Version { get; }
+        public long Version { get; }
 
         /// <summary>
         /// Converts a <see cref="Document"/> object to a <see cref="JsonEntity{T}"/> by deserializing its JSON body.
@@ -70,7 +70,7 @@ namespace PgDoc.Serialization
         /// </summary>
         public static JsonEntity<T> Create(T value, EntityType type)
         {
-            return new JsonEntity<T>(EntityId.New(type), value, ByteString.Empty);
+            return new JsonEntity<T>(EntityId.New(type), value, 0);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace PgDoc.Serialization
         /// <summary>
         /// Deconstructs the ID, body and version of this <see cref="JsonEntity{T}"/> object.
         /// </summary>
-        public void Deconstruct(out EntityId id, out T? entity, out ByteString version)
+        public void Deconstruct(out EntityId id, out T? entity, out long version)
         {
             id = Id;
             entity = Entity;
