@@ -29,7 +29,7 @@ namespace PgDoc.Serialization.Tests
         [InlineData(int.MinValue)]
         [InlineData((int)255)]
         [InlineData((int)256)]
-        public void Constructor_Success(short value)
+        public void Constructor_Success(int value)
         {
             EntityId entityId = EntityId.New(value);
             Assert.Equal(value, entityId.Type.Value);

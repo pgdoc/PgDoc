@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using Xunit;
 
 namespace PgDoc.Serialization.Tests
@@ -34,7 +36,8 @@ namespace PgDoc.Serialization.Tests
                 ByteValue = _bytes,
                 DateValue = new DateTime(2010, 6, 5, 4, 3, 2, DateTimeKind.Utc),
                 NullableDateValue = new DateTime(2011, 9, 8, 7, 5, 4, DateTimeKind.Utc),
-                EntityId = _entityId
+                EntityIdValue = _entityId,
+                ListValue = ImmutableList<string>.Empty.Add("a").Add("b").Add("c")
             };
 
             JsonEntity<TestObject> entity = new JsonEntity<TestObject>(new EntityId(_guid), testObject, 10);
@@ -42,9 +45,19 @@ namespace PgDoc.Serialization.Tests
             Document document = entity.AsDocument();
             JsonEntity<TestObject> result = JsonEntity<TestObject>.FromDocument(document);
 
+            const string expectedJson = @"{
+                ""StringValue"":""value"",
+                ""Int64Value"":100,
+                ""DecimalValue"":100.001,
+                ""ByteValue"":""ChQeKDI8RlA="",
+                ""NullableDateValue"":1315465504,
+                ""DateValue"":1275710582,
+                ""EntityIdValue"":""000a9d4a-78a1-4534-963a-37f1023a4022"",
+                ""ListValue"":[""a"",""b"",""c""]
+                }";
             Assert.Equal(_guid, document.Id);
             Assert.Equal(10, document.Version);
-            Assert.Equal(@"{""StringValue"":""value"",""Int64Value"":100,""DecimalValue"":100.001,""ByteValue"":""ChQeKDI8RlA="",""NullableDateValue"":1315465504,""DateValue"":1275710582,""EntityId"":""000a9d4a-78a1-4534-963a-37f1023a4022""}", document.Body);
+            Assert.Equal(Regex.Replace(expectedJson, "\\s", ""), document.Body);
 
             Assert.Equal(_guid, result.Id.Value);
             Assert.Equal(10, result.Version);
@@ -54,7 +67,8 @@ namespace PgDoc.Serialization.Tests
             Assert.Equal(_bytes, result.Entity.ByteValue);
             Assert.Equal(new DateTime(2010, 6, 5, 4, 3, 2), result.Entity.DateValue);
             Assert.Equal(DateTimeKind.Utc, result.Entity.DateValue.Kind);
-            Assert.Equal(_entityId, result.Entity.EntityId);
+            Assert.Equal(_entityId, result.Entity.EntityIdValue);
+            Assert.Equal(new string[] { "a", "b", "c" }, result.Entity.ListValue);
         }
 
         [Fact]
@@ -84,16 +98,27 @@ namespace PgDoc.Serialization.Tests
             Document document = entity.AsDocument();
             JsonEntity<TestObject> result = JsonEntity<TestObject>.FromDocument(document);
 
+            const string expectedJson = @"{
+                ""StringValue"":null,
+                ""Int64Value"":0,
+                ""DecimalValue"":0.0,
+                ""ByteValue"":null,
+                ""NullableDateValue"":null,
+                ""DateValue"":-62135596800,
+                ""EntityIdValue"":null,
+                ""ListValue"":null
+                }";
             Assert.Equal(_guid, document.Id);
             Assert.Equal(10, document.Version);
-            Assert.Equal(@"{""StringValue"":null,""Int64Value"":0,""DecimalValue"":0.0,""ByteValue"":null,""NullableDateValue"":null,""DateValue"":-62135596800,""EntityId"":null}", document.Body);
+            Assert.Equal(Regex.Replace(expectedJson, "\\s", ""), document.Body);
 
             Assert.Equal(_guid, result.Id.Value);
             Assert.Equal(10, result.Version);
             Assert.Null(result.Entity.StringValue);
             Assert.Null(result.Entity.ByteValue);
             Assert.Null(result.Entity.NullableDateValue);
-            Assert.Null(result.Entity.EntityId);
+            Assert.Null(result.Entity.EntityIdValue);
+            Assert.Null(result.Entity.ListValue);
         }
 
         [Theory]
@@ -216,7 +241,9 @@ namespace PgDoc.Serialization.Tests
 
             public DateTime DateValue { get; set; }
 
-            public EntityId EntityId { get; set; }
+            public EntityId EntityIdValue { get; set; }
+
+            public ImmutableList<string> ListValue { get; set; }
         }
     }
 }
