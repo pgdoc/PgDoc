@@ -23,11 +23,11 @@ namespace PgDoc.Serialization
     [AttributeUsage(AttributeTargets.Class)]
     public class JsonEntityTypeAttribute : Attribute
     {
-        public JsonEntityTypeAttribute(short entityType)
+        public JsonEntityTypeAttribute(int entityType)
         {
             EntityType = entityType;
         }
 
-        public short EntityType { get; }
+        public int EntityType { get; }
     }
 }

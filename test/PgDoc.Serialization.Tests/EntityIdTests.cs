@@ -22,13 +22,13 @@ namespace PgDoc.Serialization.Tests
         private readonly string _guid = "d31b6b50-fda9-11e8-b568-0800200c9a66";
 
         [Theory]
-        [InlineData((short)0)]
-        [InlineData((short)1)]
-        [InlineData((short)-1)]
-        [InlineData(short.MaxValue)]
-        [InlineData(short.MinValue)]
-        [InlineData((short)255)]
-        [InlineData((short)256)]
+        [InlineData((int)0)]
+        [InlineData((int)1)]
+        [InlineData((int)-1)]
+        [InlineData(int.MaxValue)]
+        [InlineData(int.MinValue)]
+        [InlineData((int)255)]
+        [InlineData((int)256)]
         public void Constructor_Success(short value)
         {
             EntityId entityId = EntityId.New(value);
@@ -38,9 +38,9 @@ namespace PgDoc.Serialization.Tests
         [Fact]
         public void New_Success()
         {
-            EntityId result = EntityId.New(new EntityType(0x1234));
+            EntityId result = EntityId.New(new EntityType(0x1234abcd));
 
-            Assert.StartsWith("1234", result.Value.ToString());
+            Assert.StartsWith("1234abcd-", result.Value.ToString());
         }
 
         [Fact]
@@ -48,9 +48,9 @@ namespace PgDoc.Serialization.Tests
         {
             EntityId entityId = new EntityId(Guid.Parse(_guid));
 
-            EntityId result = entityId.WithType(new EntityType(0x1234));
+            EntityId result = entityId.WithType(new EntityType(0x1234abcd));
 
-            Assert.Equal("12346b50-fda9-11e8-b568-0800200c9a66", result.Value.ToString());
+            Assert.Equal("1234abcd-fda9-11e8-b568-0800200c9a66", result.Value.ToString());
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace PgDoc.Serialization.Tests
 
             EntityId result = entityId.WithType<TestObject>();
 
-            Assert.Equal("00056b50-fda9-11e8-b568-0800200c9a66", result.Value.ToString());
+            Assert.Equal("12345678-fda9-11e8-b568-0800200c9a66", result.Value.ToString());
         }
 
         [Fact]
@@ -108,7 +108,7 @@ namespace PgDoc.Serialization.Tests
             Assert.NotEqual(value1.GetHashCode(), value2.GetHashCode());
         }
 
-        [JsonEntityType(5)]
+        [JsonEntityType(0x12345678)]
         public class TestObject
         { }
     }

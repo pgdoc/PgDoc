@@ -22,12 +22,12 @@ namespace PgDoc.Serialization
     /// </summary>
     public readonly struct EntityType : IEquatable<EntityType>
     {
-        public EntityType(short value)
+        public EntityType(int value)
         {
             Value = value;
         }
 
-        public short Value { get; }
+        public int Value { get; }
 
         public static EntityType GetEntityType<T>()
         {

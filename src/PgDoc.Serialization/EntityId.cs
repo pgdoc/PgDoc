@@ -20,7 +20,7 @@ using System.Threading;
 namespace PgDoc.Serialization
 {
     /// <summary>
-    /// Represents a <see cref="Guid"/> object whose first 16 bits are used to represent an entity type.
+    /// Represents a <see cref="Guid"/> object whose first 32 bits are used to represent an entity type.
     /// </summary>
     public class EntityId : IEquatable<EntityId?>
     {
@@ -31,7 +31,7 @@ namespace PgDoc.Serialization
         {
             Value = id;
             byte[] byteArray = id.ToByteArray();
-            Type = new EntityType((short)((byteArray[3] << 8) | byteArray[2]));
+            Type = new EntityType((byteArray[3] << 24) | (byteArray[2] << 16) | (byteArray[1] << 8) | byteArray[0]);
         }
 
         /// <summary>
@@ -55,13 +55,15 @@ namespace PgDoc.Serialization
         /// <summary>
         /// Generates a random <see cref="EntityId"/> value with the specified entity type.
         /// </summary>
-        public static EntityId New(short type)
+        public static EntityId New(int type)
         {
             byte[] data = new byte[16];
             _random.Value.GetBytes(data);
 
-            data[2] = (byte)(type & 0xFF);
-            data[3] = (byte)(type >> 8);
+            data[0] = (byte)(type & 0xFF);
+            data[1] = (byte)((type >> 8) & 0xFF);
+            data[2] = (byte)((type >> 16) & 0xFF);
+            data[3] = (byte)((type >> 24) & 0xFF);
 
             return new EntityId(new Guid(data));
         }
@@ -81,8 +83,10 @@ namespace PgDoc.Serialization
         {
             byte[] data = Value.ToByteArray();
 
-            data[2] = (byte)(type.Value & 0xFF);
-            data[3] = (byte)(type.Value >> 8);
+            data[0] = (byte)(type.Value & 0xFF);
+            data[1] = (byte)((type.Value >> 8) & 0xFF);
+            data[2] = (byte)((type.Value >> 16) & 0xFF);
+            data[3] = (byte)((type.Value >> 24) & 0xFF);
 
             return new EntityId(new Guid(data));
         }
