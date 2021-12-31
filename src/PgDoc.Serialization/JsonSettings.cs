@@ -12,29 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization;
+
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace PgDoc.Serialization
+public class JsonSettings
 {
-    public class JsonSettings
+    public static JsonSerializerSettings Settings { get; }
+
+    static JsonSettings()
     {
-        public static JsonSerializerSettings Settings { get; }
-
-        static JsonSettings()
+        List<JsonConverter> converters = new()
         {
-            List<JsonConverter> converters = new List<JsonConverter>()
-            {
-                new UnixTimeConverter(),
-                new ByteArrayConverter(),
-                new EntityIdConverter()
-            };
+            new UnixTimeConverter(),
+            new ByteArrayConverter(),
+            new EntityIdConverter()
+        };
 
-            Settings = new JsonSerializerSettings()
-            {
-                Converters = converters,
-                Formatting = Formatting.None
-            };
-        }
+        Settings = new JsonSerializerSettings()
+        {
+            Converters = converters,
+            Formatting = Formatting.None
+        };
     }
 }

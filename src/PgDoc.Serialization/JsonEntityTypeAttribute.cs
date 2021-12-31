@@ -12,22 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization;
+
 using System;
 
-namespace PgDoc.Serialization
+/// <summary>
+/// Indicates which entity type to use when generating an <see cref="EntityId"/> for an instance of the class to
+/// which this attribute is applied.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public class JsonEntityTypeAttribute : Attribute
 {
-    /// <summary>
-    /// Indicates which entity type to use when generating an <see cref="EntityId"/> for an instance of the class to
-    /// which this attribute is applied.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    public class JsonEntityTypeAttribute : Attribute
+    public JsonEntityTypeAttribute(int entityType)
     {
-        public JsonEntityTypeAttribute(int entityType)
-        {
-            EntityType = entityType;
-        }
-
-        public int EntityType { get; }
+        EntityType = entityType;
     }
+
+    public int EntityType { get; }
 }

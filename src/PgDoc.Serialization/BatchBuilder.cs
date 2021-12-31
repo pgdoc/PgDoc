@@ -12,100 +12,99 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization;
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace PgDoc.Serialization
+public class BatchBuilder
 {
-    public class BatchBuilder
+    private readonly IDocumentStore _dataStore;
+    private readonly Dictionary<Guid, Document> _checkedDocuments = new();
+    private readonly Dictionary<Guid, Document> _modifiedDocuments = new();
+
+    public BatchBuilder(IDocumentStore store)
     {
-        private readonly IDocumentStore _dataStore;
-        private readonly Dictionary<Guid, Document> _checkedDocuments = new Dictionary<Guid, Document>();
-        private readonly Dictionary<Guid, Document> _modifiedDocuments = new Dictionary<Guid, Document>();
+        _dataStore = store ?? throw new ArgumentNullException(nameof(store));
+    }
 
-        public BatchBuilder(IDocumentStore store)
+    public void Check(params Document[] documents)
+    {
+        List<Document> addCheckDocuments = new();
+
+        // Validation phase
+        foreach (Document document in documents)
         {
-            _dataStore = store ?? throw new ArgumentNullException(nameof(store));
-        }
-
-        public void Check(params Document[] documents)
-        {
-            List<Document> addCheckDocuments = new List<Document>();
-
-            // Validation phase
-            foreach (Document document in documents)
+            if (_checkedDocuments.TryGetValue(document.Id, out Document existingDocument))
             {
-                if (_checkedDocuments.TryGetValue(document.Id, out Document existingDocument))
-                {
-                    if (existingDocument.Version.Equals(document.Version))
-                        continue;
-                    else
-                        throw new InvalidOperationException($"A different version of document {document.Id} is already being checked.");
-                }
-                else if (_modifiedDocuments.TryGetValue(document.Id, out existingDocument))
-                {
-                    if (existingDocument.Version.Equals(document.Version))
-                        continue;
-                    else
-                        throw new InvalidOperationException($"A different version of document {document.Id} is already being modified.");
-                }
-
-                addCheckDocuments.Add(document);
+                if (existingDocument.Version.Equals(document.Version))
+                    continue;
+                else
+                    throw new InvalidOperationException($"A different version of document {document.Id} is already being checked.");
+            }
+            else if (_modifiedDocuments.TryGetValue(document.Id, out existingDocument))
+            {
+                if (existingDocument.Version.Equals(document.Version))
+                    continue;
+                else
+                    throw new InvalidOperationException($"A different version of document {document.Id} is already being modified.");
             }
 
-            foreach (Document document in addCheckDocuments)
-                _checkedDocuments.Add(document.Id, document);
+            addCheckDocuments.Add(document);
         }
 
-        public void Check<T>(IJsonEntity<T> document)
-            where T : class
-        {
-            Check(document.AsDocument());
-        }
+        foreach (Document document in addCheckDocuments)
+            _checkedDocuments.Add(document.Id, document);
+    }
 
-        public void Modify(params Document[] documents)
-        {
-            List<Guid> removeCheckedDocuments = new List<Guid>();
-            List<Document> addModifyDocuments = new List<Document>();
+    public void Check<T>(IJsonEntity<T> document)
+        where T : class
+    {
+        Check(document.AsDocument());
+    }
 
-            // Validation phase
-            foreach (Document document in documents)
+    public void Modify(params Document[] documents)
+    {
+        List<Guid> removeCheckedDocuments = new();
+        List<Document> addModifyDocuments = new();
+
+        // Validation phase
+        foreach (Document document in documents)
+        {
+            if (_checkedDocuments.TryGetValue(document.Id, out Document existingDocument))
             {
-                if (_checkedDocuments.TryGetValue(document.Id, out Document existingDocument))
-                {
-                    if (existingDocument.Version.Equals(document.Version))
-                        removeCheckedDocuments.Add(document.Id);
-                    else
-                        throw new InvalidOperationException($"A different version of document {document.Id} is already being checked.");
-                }
-                else if (_modifiedDocuments.TryGetValue(document.Id, out existingDocument))
-                {
-                    throw new InvalidOperationException($"Document {document.Id} is already being modified.");
-                }
-
-                addModifyDocuments.Add(document);
+                if (existingDocument.Version.Equals(document.Version))
+                    removeCheckedDocuments.Add(document.Id);
+                else
+                    throw new InvalidOperationException($"A different version of document {document.Id} is already being checked.");
+            }
+            else if (_modifiedDocuments.TryGetValue(document.Id, out existingDocument))
+            {
+                throw new InvalidOperationException($"Document {document.Id} is already being modified.");
             }
 
-            foreach (Guid remove in removeCheckedDocuments)
-                _checkedDocuments.Remove(remove);
-
-            foreach (Document document in addModifyDocuments)
-                _modifiedDocuments.Add(document.Id, document);
+            addModifyDocuments.Add(document);
         }
 
-        public void Modify<T>(IJsonEntity<T> document)
-            where T : class
-        {
-            Modify(document.AsDocument());
-        }
+        foreach (Guid remove in removeCheckedDocuments)
+            _checkedDocuments.Remove(remove);
 
-        public async Task Submit()
-        {
-            await _dataStore.UpdateDocuments(_modifiedDocuments.Values, _checkedDocuments.Values);
+        foreach (Document document in addModifyDocuments)
+            _modifiedDocuments.Add(document.Id, document);
+    }
 
-            _checkedDocuments.Clear();
-            _modifiedDocuments.Clear();
-        }
+    public void Modify<T>(IJsonEntity<T> document)
+        where T : class
+    {
+        Modify(document.AsDocument());
+    }
+
+    public async Task Submit()
+    {
+        await _dataStore.UpdateDocuments(_modifiedDocuments.Values, _checkedDocuments.Values);
+
+        _checkedDocuments.Clear();
+        _modifiedDocuments.Clear();
     }
 }

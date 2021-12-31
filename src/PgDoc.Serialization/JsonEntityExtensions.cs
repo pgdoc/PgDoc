@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization;
+
 using Newtonsoft.Json;
 
-namespace PgDoc.Serialization
+public static class JsonEntityExtensions
 {
-    public static class JsonEntityExtensions
+    /// <summary>
+    /// Converts a <see cref="IJsonEntity{T}"/> object to a <see cref="Document"/> object by serializing its body
+    /// to JSON.
+    /// </summary>
+    public static Document AsDocument<T>(this IJsonEntity<T> jsonEntity)
+        where T : class
     {
-        /// <summary>
-        /// Converts a <see cref="IJsonEntity{T}"/> object to a <see cref="Document"/> object by serializing its body
-        /// to JSON.
-        /// </summary>
-        public static Document AsDocument<T>(this IJsonEntity<T> jsonEntity)
-            where T : class
-        {
-            return new Document(
-                jsonEntity.Id.Value,
-                jsonEntity.Entity == null ? null : JsonConvert.SerializeObject(jsonEntity.Entity, JsonSettings.Settings),
-                jsonEntity.Version);
-        }
+        return new Document(
+            jsonEntity.Id.Value,
+            jsonEntity.Entity == null ? null : JsonConvert.SerializeObject(jsonEntity.Entity, JsonSettings.Settings),
+            jsonEntity.Version);
     }
 }

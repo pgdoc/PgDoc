@@ -12,53 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization.Tests;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Npgsql;
 using Xunit;
 
-namespace PgDoc.Serialization.Tests
+public class DocumentQueryTests
 {
-    public class DocumentQueryTests
+    private readonly NpgsqlConnection _connection;
+
+    private readonly SqlDocumentStore _store;
+
+    public DocumentQueryTests()
     {
-        private readonly NpgsqlConnection _connection;
+        _connection = new NpgsqlConnection(ConfigurationManager.GetSetting("connection_string"));
 
-        private readonly SqlDocumentStore _store;
+        _store = new SqlDocumentStore(_connection);
+        _store.Initialize().Wait();
 
-        public DocumentQueryTests()
-        {
-            _connection = new NpgsqlConnection(ConfigurationManager.GetSetting("connection_string"));
+        NpgsqlCommand command = _connection.CreateCommand();
+        command.CommandText = @"TRUNCATE TABLE document;";
+        command.ExecuteNonQuery();
+    }
 
-            _store = new SqlDocumentStore(_connection);
-            _store.Initialize().Wait();
+    [Fact]
+    public async Task ExecuteList_Success()
+    {
+        JsonEntity<TestObject> entity = JsonEntity<TestObject>.Create(new TestObject() { Value = "abcd" });
+        await _store.UpdateEntities(entity);
 
-            NpgsqlCommand command = _connection.CreateCommand();
-            command.CommandText = @"TRUNCATE TABLE document;";
-            command.ExecuteNonQuery();
-        }
+        _connection.CreateCommand();
+        NpgsqlCommand command = _connection.CreateCommand();
+        command.CommandText = "SELECT id, body, version FROM document";
 
-        [Fact]
-        public async Task ExecuteList_Success()
-        {
-            JsonEntity<TestObject> entity = JsonEntity<TestObject>.Create(new TestObject() { Value = "abcd" });
-            await _store.UpdateEntities(entity);
+        IReadOnlyList<JsonEntity<TestObject>> result = await DocumentQuery.ExecuteList<TestObject>(command);
 
-            _connection.CreateCommand();
-            NpgsqlCommand command = _connection.CreateCommand();
-            command.CommandText = "SELECT id, body, version FROM document";
+        Assert.Equal(1, result.Count);
+        Assert.Equal(entity.Id, result[0].Id);
+        Assert.Equal("abcd", result[0].Entity.Value);
+        Assert.Equal(1, result[0].Version);
+    }
 
-            IReadOnlyList<JsonEntity<TestObject>> result = await DocumentQuery.ExecuteList<TestObject>(command);
-
-            Assert.Equal(1, result.Count);
-            Assert.Equal(entity.Id, result[0].Id);
-            Assert.Equal("abcd", result[0].Entity.Value);
-            Assert.Equal(1, result[0].Version);
-        }
-
-        [JsonEntityType(1)]
-        public class TestObject
-        {
-            public string Value { get; set; }
-        }
+    [JsonEntityType(1)]
+    public class TestObject
+    {
+        public string Value { get; set; }
     }
 }

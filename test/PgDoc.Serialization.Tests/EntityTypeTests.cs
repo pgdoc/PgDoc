@@ -12,78 +12,77 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization.Tests;
+
 using System;
 using Xunit;
 
-namespace PgDoc.Serialization.Tests
+public class EntityTypeTests
 {
-    public class EntityTypeTests
+    [Fact]
+    public void Constructor_Success()
     {
-        [Fact]
-        public void Constructor_Success()
-        {
-            EntityType entityType = new EntityType(10);
+        EntityType entityType = new(10);
 
-            Assert.Equal(10, entityType.Value);
-        }
+        Assert.Equal(10, entityType.Value);
+    }
 
-        [Fact]
-        public void GetEntityType_Success()
-        {
-            EntityType entityType = EntityType.GetEntityType<TestEntity>();
+    [Fact]
+    public void GetEntityType_Success()
+    {
+        EntityType entityType = EntityType.GetEntityType<TestEntity>();
 
-            Assert.Equal(4, entityType.Value);
-        }
+        Assert.Equal(4, entityType.Value);
+    }
 
-        [Fact]
-        public void GetEntityType_NoAttribute()
-        {
-            ArgumentException exception = Assert.Throws<ArgumentException>(
-                () => EntityType.GetEntityType<string>());
+    [Fact]
+    public void GetEntityType_NoAttribute()
+    {
+        ArgumentException exception = Assert.Throws<ArgumentException>(
+            () => EntityType.GetEntityType<string>());
 
-            Assert.StartsWith("The type String does not have a JsonEntityType attribute. ", exception.Message);
-        }
+        Assert.StartsWith("The type String does not have a JsonEntityType attribute. ", exception.Message);
+    }
 
-        [Fact]
-        public void Equals_Success()
-        {
-            Assert.True(new EntityType(1).Equals(new EntityType(1)));
-            Assert.False(new EntityType(1).Equals(new EntityType(2)));
-            Assert.True(((object)new EntityType(1)).Equals(new EntityType(1)));
-            Assert.False(new EntityType(1).Equals("string"));
-            Assert.False(new EntityType(1).Equals(null));
-        }
+    [Fact]
+    public void Equals_Success()
+    {
+        Assert.True(new EntityType(1).Equals(new EntityType(1)));
+        Assert.False(new EntityType(1).Equals(new EntityType(2)));
+        Assert.True(((object)new EntityType(1)).Equals(new EntityType(1)));
+        Assert.False(new EntityType(1).Equals("string"));
+        Assert.False(new EntityType(1).Equals(null));
+    }
 
-        [Fact]
-        public void GetHashCode_Success()
-        {
-            EntityType value1 = new EntityType(1);
-            EntityType value2 = new EntityType(2);
-            EntityType value3 = new EntityType(1);
+    [Fact]
+    public void GetHashCode_Success()
+    {
+        EntityType value1 = new(1);
+        EntityType value2 = new(2);
+        EntityType value3 = new(1);
 
-            Assert.Equal(value1.GetHashCode(), value3.GetHashCode());
-            Assert.NotEqual(value1.GetHashCode(), value2.GetHashCode());
-        }
+        Assert.Equal(value1.GetHashCode(), value3.GetHashCode());
+        Assert.NotEqual(value1.GetHashCode(), value2.GetHashCode());
+    }
 
-        [Fact]
-        public void Equality_Success()
-        {
-            Assert.True(new EntityType(1) == new EntityType(1));
-            Assert.False(new EntityType(1) == new EntityType(2));
-        }
+    [Fact]
+    public void Equality_Success()
+    {
+        Assert.True(new EntityType(1) == new EntityType(1));
+        Assert.False(new EntityType(1) == new EntityType(2));
+    }
 
-        [Fact]
-        public void Inequality_Success()
-        {
-            Assert.False(new EntityType(1) != new EntityType(1));
-            Assert.True(new EntityType(1) != new EntityType(2));
-        }
+    [Fact]
+    public void Inequality_Success()
+    {
+        Assert.False(new EntityType(1) != new EntityType(1));
+        Assert.True(new EntityType(1) != new EntityType(2));
+    }
 
-        [Serializable]
-        [JsonEntityType(4)]
-        private class TestEntity
-        {
-            public string StringValue { get; set; }
-        }
+    [Serializable]
+    [JsonEntityType(4)]
+    private class TestEntity
+    {
+        public string StringValue { get; set; }
     }
 }

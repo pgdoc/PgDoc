@@ -12,58 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization;
+
 using System;
 using System.Linq;
 
-namespace PgDoc.Serialization
+/// <summary>
+/// Represents a value that identifies the type of a JSON entity.
+/// </summary>
+public readonly struct EntityType : IEquatable<EntityType>
 {
-    /// <summary>
-    /// Represents a value that identifies the type of a JSON entity.
-    /// </summary>
-    public readonly struct EntityType : IEquatable<EntityType>
+    public EntityType(int value)
     {
-        public EntityType(int value)
-        {
-            Value = value;
-        }
+        Value = value;
+    }
 
-        public int Value { get; }
+    public int Value { get; }
 
-        public static EntityType GetEntityType<T>()
-        {
-            object[] customAttributes = typeof(T).GetCustomAttributes(typeof(JsonEntityTypeAttribute), true);
+    public static EntityType GetEntityType<T>()
+    {
+        object[] customAttributes = typeof(T).GetCustomAttributes(typeof(JsonEntityTypeAttribute), true);
 
-            JsonEntityTypeAttribute attribute = customAttributes.OfType<JsonEntityTypeAttribute>().FirstOrDefault();
+        JsonEntityTypeAttribute attribute = customAttributes.OfType<JsonEntityTypeAttribute>().FirstOrDefault();
 
-            if (attribute == null)
-                throw new ArgumentException($"The type {typeof(T).Name} does not have a JsonEntityType attribute.", nameof(T));
+        if (attribute == null)
+            throw new ArgumentException($"The type {typeof(T).Name} does not have a JsonEntityType attribute.", nameof(T));
 
-            return new EntityType(attribute.EntityType);
-        }
+        return new EntityType(attribute.EntityType);
+    }
 
-        public bool Equals(EntityType other)
-        {
-            return Value == other.Value;
-        }
+    public bool Equals(EntityType other)
+    {
+        return Value == other.Value;
+    }
 
-        public override bool Equals(object other)
-        {
-            return (other is EntityType otherEntityType) && Equals(otherEntityType);
-        }
+    public override bool Equals(object other)
+    {
+        return (other is EntityType otherEntityType) && Equals(otherEntityType);
+    }
 
-        public override int GetHashCode()
-        {
-            return Value.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
 
-        public static bool operator ==(EntityType left, EntityType right)
-        {
-            return left.Value == right.Value;
-        }
+    public static bool operator ==(EntityType left, EntityType right)
+    {
+        return left.Value == right.Value;
+    }
 
-        public static bool operator !=(EntityType left, EntityType right)
-        {
-            return left.Value != right.Value;
-        }
+    public static bool operator !=(EntityType left, EntityType right)
+    {
+        return left.Value != right.Value;
     }
 }

@@ -12,37 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization;
+
 using System;
 using Newtonsoft.Json;
 
-namespace PgDoc.Serialization
+public class ByteArrayConverter : JsonConverter
 {
-    public class ByteArrayConverter : JsonConverter
+    public override bool CanConvert(Type objectType)
     {
-        public override bool CanConvert(Type objectType)
+        return objectType == typeof(byte[]);
+    }
+
+    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+    {
+        string? encodedData = (string?)reader.Value;
+
+        if (encodedData == null)
         {
-            return objectType == typeof(byte[]);
+            return null;
         }
-
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        else
         {
-            string? encodedData = (string?)reader.Value;
-
-            if (encodedData == null)
-            {
-                return null;
-            }
-            else
-            {
-                return Convert.FromBase64String(encodedData);
-            }
+            return Convert.FromBase64String(encodedData);
         }
+    }
 
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-        {
-            byte[] data = (byte[])value;
+    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+    {
+        byte[] data = (byte[])value!;
 
-            writer.WriteValue(Convert.ToBase64String(data));
-        }
+        writer.WriteValue(Convert.ToBase64String(data));
     }
 }

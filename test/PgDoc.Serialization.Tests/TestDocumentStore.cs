@@ -12,54 +12,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization.Tests;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PgDoc.Serialization.Tests
+public class TestDocumentStore : IDocumentStore
 {
-    public class TestDocumentStore : IDocumentStore
+    public IDictionary<Guid, Tuple<string, long>> Store { get; } = new Dictionary<Guid, Tuple<string, long>>();
+
+    public Task Initialize()
     {
-        private byte _currentVersion = 0;
-
-        public IDictionary<Guid, Tuple<string, long>> Store { get; } = new Dictionary<Guid, Tuple<string, long>>();
-
-        public Task Initialize()
-        {
-            return Task.FromResult(0);
-        }
-
-        public Task<IReadOnlyList<Document>> GetDocuments(IEnumerable<Guid> ids)
-        {
-            return Task.FromResult((IReadOnlyList<Document>)ids.Select(id =>
-            {
-                if (Store.TryGetValue(id, out Tuple<string, long> value))
-                    return new Document(id, value.Item1, value.Item2);
-                else
-                    return new Document(id, null, 0);
-            })
-            .ToList()
-            .AsReadOnly());
-        }
-
-        public async Task UpdateDocuments(IEnumerable<Document> updatedDocuments, IEnumerable<Document> checkedDocuments)
-        {
-            foreach (Document document in updatedDocuments.Concat(checkedDocuments))
-            {
-                IReadOnlyList<Document> existing = await GetDocuments(new[] { document.Id });
-
-                if (!existing[0].Version.Equals(document.Version))
-                    throw new UpdateConflictException(document.Id, document.Version);
-            }
-
-            foreach (Document document in updatedDocuments)
-            {
-                Store[document.Id] = Tuple.Create(document.Body, document.Version + 1);
-            }
-        }
-
-        public void Dispose()
-        { }
+        return Task.FromResult(0);
     }
+
+    public Task<IReadOnlyList<Document>> GetDocuments(IEnumerable<Guid> ids)
+    {
+        return Task.FromResult((IReadOnlyList<Document>)ids.Select(id =>
+        {
+            if (Store.TryGetValue(id, out Tuple<string, long> value))
+                return new Document(id, value.Item1, value.Item2);
+            else
+                return new Document(id, null, 0);
+        })
+        .ToList()
+        .AsReadOnly());
+    }
+
+    public async Task UpdateDocuments(IEnumerable<Document> updatedDocuments, IEnumerable<Document> checkedDocuments)
+    {
+        foreach (Document document in updatedDocuments.Concat(checkedDocuments))
+        {
+            IReadOnlyList<Document> existing = await GetDocuments(new[] { document.Id });
+
+            if (!existing[0].Version.Equals(document.Version))
+                throw new UpdateConflictException(document.Id, document.Version);
+        }
+
+        foreach (Document document in updatedDocuments)
+        {
+            Store[document.Id] = Tuple.Create(document.Body, document.Version + 1);
+        }
+    }
+
+    public void Dispose()
+    { }
 }

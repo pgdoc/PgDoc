@@ -12,50 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PgDoc.Serialization
+public static class DocumentStoreExtensions
 {
-    public static class DocumentStoreExtensions
+    /// <summary>
+    /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
+    /// </summary>
+    /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
+    /// base version.</exception>
+    public static async Task UpdateEntities(
+        this IDocumentStore documentStore,
+        IEnumerable<IJsonEntity<object>> updatedDocuments,
+        IEnumerable<IJsonEntity<object>> checkedDocuments)
     {
-        /// <summary>
-        /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
-        /// </summary>
-        /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
-        /// base version.</exception>
-        public static async Task UpdateEntities(
-            this IDocumentStore documentStore,
-            IEnumerable<IJsonEntity<object>> updatedDocuments,
-            IEnumerable<IJsonEntity<object>> checkedDocuments)
-        {
-            await documentStore.UpdateDocuments(
-                updatedDocuments.Select(JsonEntityExtensions.AsDocument),
-                checkedDocuments.Select(JsonEntityExtensions.AsDocument));
-        }
+        await documentStore.UpdateDocuments(
+            updatedDocuments.Select(JsonEntityExtensions.AsDocument),
+            checkedDocuments.Select(JsonEntityExtensions.AsDocument));
+    }
 
-        /// <summary>
-        /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
-        /// </summary>
-        /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
-        /// base version.</exception>
-        public static async Task UpdateEntities(
-            this IDocumentStore documentStore,
-            params IJsonEntity<object>[] updatedDocuments)
-        {
-            await documentStore.UpdateEntities(updatedDocuments, Array.Empty<IJsonEntity<object>>());
-        }
+    /// <summary>
+    /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
+    /// </summary>
+    /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
+    /// base version.</exception>
+    public static async Task UpdateEntities(
+        this IDocumentStore documentStore,
+        params IJsonEntity<object>[] updatedDocuments)
+    {
+        await documentStore.UpdateEntities(updatedDocuments, Array.Empty<IJsonEntity<object>>());
+    }
 
-        /// <summary>
-        /// Retrieves a document given its ID, represented as a <see cref="JsonEntity{T}"/> object.
-        /// </summary>
-        public static async Task<JsonEntity<T>> GetEntity<T>(this IDocumentStore documentStore, EntityId id)
-            where T : class
-        {
-            Document result = await documentStore.GetDocument(id.Value);
-            return JsonEntity<T>.FromDocument(result);
-        }
+    /// <summary>
+    /// Retrieves a document given its ID, represented as a <see cref="JsonEntity{T}"/> object.
+    /// </summary>
+    public static async Task<JsonEntity<T>> GetEntity<T>(this IDocumentStore documentStore, EntityId id)
+        where T : class
+    {
+        Document result = await documentStore.GetDocument(id.Value);
+        return JsonEntity<T>.FromDocument(result);
     }
 }

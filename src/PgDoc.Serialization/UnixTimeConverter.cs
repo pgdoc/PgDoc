@@ -12,43 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization;
+
 using System;
 using Newtonsoft.Json;
 
-namespace PgDoc.Serialization
+public class UnixTimeConverter : JsonConverter
 {
-    public class UnixTimeConverter : JsonConverter
+    private static readonly DateTime _epoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+
+    public override bool CanConvert(Type objectType)
     {
-        private static readonly DateTime _epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        return objectType == typeof(DateTime) || objectType == typeof(DateTime?);
+    }
 
-        public override bool CanConvert(Type objectType)
+    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+    {
+        if (reader.Value == null)
         {
-            return objectType == typeof(DateTime) || objectType == typeof(DateTime?);
+            return null;
         }
-
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        else
         {
-            if (reader.Value == null)
-            {
-                return null;
-            }
-            else
-            {
-                long encodedData = (long)reader.Value;
-                return _epoch + TimeSpan.FromSeconds(encodedData);
-            }
+            long encodedData = (long)reader.Value;
+            return _epoch + TimeSpan.FromSeconds(encodedData);
         }
+    }
 
-        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-        {
-            DateTime date = (DateTime)value;
+    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+    {
+        DateTime date = (DateTime)value!;
 
-            writer.WriteValue(FromDate(date));
-        }
+        writer.WriteValue(FromDate(date));
+    }
 
-        public static long FromDate(DateTime date)
-        {
-            return (long)(date - _epoch).TotalSeconds;
-        }
+    public static long FromDate(DateTime date)
+    {
+        return (long)(date - _epoch).TotalSeconds;
     }
 }

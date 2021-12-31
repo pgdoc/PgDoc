@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <LangVersion>10.0</LangVersion>
 
     <Description>PgDoc.Serialization is a library for serializing .NET objects to JSON and store them into a PostgreSQL document store.</Description>
     <Authors>Flavien Charlon</Authors>

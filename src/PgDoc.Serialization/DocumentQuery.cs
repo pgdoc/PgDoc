@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization;
+
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -22,45 +24,42 @@ using System.Threading;
 using System.Threading.Tasks;
 using Npgsql;
 
-namespace PgDoc.Serialization
+public static class DocumentQuery
 {
-    public static class DocumentQuery
+    /// <summary>
+    /// Executes a SQL query and converts the result into an asynchronous stream of <see cref="JsonEntity{T}"/>
+    /// objects. The query must return the id, body and version columns.
+    /// </summary>
+    public static async IAsyncEnumerable<JsonEntity<T>> Execute<T>(
+        NpgsqlCommand command,
+        [EnumeratorCancellation] CancellationToken cancel = default)
+        where T : class
     {
-        /// <summary>
-        /// Executes a SQL query and converts the result into an asynchronous stream of <see cref="JsonEntity{T}"/>
-        /// objects. The query must return the id, body and version columns.
-        /// </summary>
-        public static async IAsyncEnumerable<JsonEntity<T>> Execute<T>(
-            NpgsqlCommand command,
-            [EnumeratorCancellation] CancellationToken cancel = default)
-            where T : class
+        using (DbDataReader reader = await command.ExecuteReaderAsync(
+            CommandBehavior.Default | CommandBehavior.SingleResult,
+            cancel))
         {
-            using (DbDataReader reader = await command.ExecuteReaderAsync(
-                CommandBehavior.Default | CommandBehavior.SingleResult,
-                cancel))
+            while (await reader.ReadAsync(cancel))
             {
-                while (await reader.ReadAsync(cancel))
-                {
-                    Document document = new Document(
-                        (Guid)reader["id"],
-                        (string)reader["body"],
-                        (long)reader["version"]);
+                Document document = new(
+                    (Guid)reader["id"],
+                    (string)reader["body"],
+                    (long)reader["version"]);
 
-                    yield return JsonEntity<T>.FromDocument(document);
-                }
+                yield return JsonEntity<T>.FromDocument(document);
             }
         }
+    }
 
-        /// <summary>
-        /// Executes a SQL query and converts the result into a list of <see cref="JsonEntity{T}"/> objects. The query
-        /// must return the id, body and version columns.
-        /// </summary>
-        public static async Task<IReadOnlyList<JsonEntity<T>>> ExecuteList<T>(
-            NpgsqlCommand command,
-            CancellationToken cancel = default)
-            where T : class
-        {
-            return (await Execute<T>(command, cancel).ToListAsync(cancel)).AsReadOnly();
-        }
+    /// <summary>
+    /// Executes a SQL query and converts the result into a list of <see cref="JsonEntity{T}"/> objects. The query
+    /// must return the id, body and version columns.
+    /// </summary>
+    public static async Task<IReadOnlyList<JsonEntity<T>>> ExecuteList<T>(
+        NpgsqlCommand command,
+        CancellationToken cancel = default)
+        where T : class
+    {
+        return (await Execute<T>(command, cancel).ToListAsync(cancel)).AsReadOnly();
     }
 }

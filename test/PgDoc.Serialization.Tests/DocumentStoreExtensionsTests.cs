@@ -12,88 +12,87 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+namespace PgDoc.Serialization.Tests;
+
 using System.Threading.Tasks;
 using Xunit;
 
-namespace PgDoc.Serialization.Tests
+public class DocumentStoreExtensionsTests
 {
-    public class DocumentStoreExtensionsTests
+    private readonly EntityId _entityId = EntityId.New(new EntityType(1));
+    private readonly TestDocumentStore _store;
+
+    public DocumentStoreExtensionsTests()
     {
-        private readonly EntityId _entityId = EntityId.New(new EntityType(1));
-        private readonly TestDocumentStore _store;
+        _store = new TestDocumentStore();
+    }
 
-        public DocumentStoreExtensionsTests()
-        {
-            _store = new TestDocumentStore();
-        }
+    [Fact]
+    public async Task UpdateEntities_Update()
+    {
+        await _store.UpdateEntities(new JsonEntity<string>(_entityId, "Value", 0));
 
-        [Fact]
-        public async Task UpdateEntities_Update()
-        {
-            await _store.UpdateEntities(new JsonEntity<string>(_entityId, "Value", 0));
+        JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
 
-            JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
+        Assert.Equal(_entityId, entity.Id);
+        Assert.Equal("Value", entity.Entity);
+        Assert.Equal(1, entity.Version);
+    }
 
-            Assert.Equal(_entityId, entity.Id);
-            Assert.Equal("Value", entity.Entity);
-            Assert.Equal(1, entity.Version);
-        }
+    [Fact]
+    public async Task UpdateEntities_Check()
+    {
+        await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
 
-        [Fact]
-        public async Task UpdateEntities_Check()
-        {
-            await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
+        await _store.UpdateEntities(
+            new IJsonEntity<object>[0],
+            new[] { new JsonEntity<string>(_entityId, null, 1) });
 
-            await _store.UpdateEntities(
-                new IJsonEntity<object>[0],
-                new[] { new JsonEntity<string>(_entityId, null, 1) });
+        JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
 
-            JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
+        Assert.Equal(_entityId, entity.Id);
+        Assert.Equal("Value", entity.Entity);
+        Assert.Equal(1, entity.Version);
+    }
 
-            Assert.Equal(_entityId, entity.Id);
-            Assert.Equal("Value", entity.Entity);
-            Assert.Equal(1, entity.Version);
-        }
+    [Fact]
+    public async Task UpdateEntities_Multiple()
+    {
+        JsonEntity<string> entity1 = JsonEntity<string>.Create("Value", new EntityType(1));
+        JsonEntity<int[]> entity2 = JsonEntity<int[]>.Create(new[] { 1, 2, 3 }, new EntityType(2));
 
-        [Fact]
-        public async Task UpdateEntities_Multiple()
-        {
-            JsonEntity<string> entity1 = JsonEntity<string>.Create("Value", new EntityType(1));
-            JsonEntity<int[]> entity2 = JsonEntity<int[]>.Create(new[] { 1, 2, 3 }, new EntityType(2));
+        await _store.UpdateEntities(entity1, entity2);
 
-            await _store.UpdateEntities(entity1, entity2);
+        JsonEntity<string> result1 = await _store.GetEntity<string>(entity1.Id);
+        JsonEntity<int[]> result2 = await _store.GetEntity<int[]>(entity2.Id);
 
-            JsonEntity<string> result1 = await _store.GetEntity<string>(entity1.Id);
-            JsonEntity<int[]> result2 = await _store.GetEntity<int[]>(entity2.Id);
+        Assert.Equal(entity1.Id, result1.Id);
+        Assert.Equal("Value", result1.Entity);
+        Assert.Equal(1, result1.Version);
+        Assert.Equal(entity2.Id, result2.Id);
+        Assert.Equal(new int[] { 1, 2, 3 }, result2.Entity);
+        Assert.Equal(1, result2.Version);
+    }
 
-            Assert.Equal(entity1.Id, result1.Id);
-            Assert.Equal("Value", result1.Entity);
-            Assert.Equal(1, result1.Version);
-            Assert.Equal(entity2.Id, result2.Id);
-            Assert.Equal(new int[] { 1, 2, 3 }, result2.Entity);
-            Assert.Equal(1, result2.Version);
-        }
+    [Fact]
+    public async Task GetEntity_Found()
+    {
+        await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
 
-        [Fact]
-        public async Task GetEntity_Found()
-        {
-            await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
+        JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
 
-            JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
+        Assert.Equal(_entityId, entity.Id);
+        Assert.Equal("Value", entity.Entity);
+        Assert.Equal(1, entity.Version);
+    }
 
-            Assert.Equal(_entityId, entity.Id);
-            Assert.Equal("Value", entity.Entity);
-            Assert.Equal(1, entity.Version);
-        }
+    [Fact]
+    public async Task GetEntity_NotFound()
+    {
+        JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
 
-        [Fact]
-        public async Task GetEntity_NotFound()
-        {
-            JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
-
-            Assert.Equal(_entityId, entity.Id);
-            Assert.Null(entity.Entity);
-            Assert.Equal(0, entity.Version);
-        }
+        Assert.Equal(_entityId, entity.Id);
+        Assert.Null(entity.Entity);
+        Assert.Equal(0, entity.Version);
     }
 }
