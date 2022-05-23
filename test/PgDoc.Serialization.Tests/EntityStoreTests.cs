@@ -17,22 +17,24 @@ namespace PgDoc.Serialization.Tests;
 using System.Threading.Tasks;
 using Xunit;
 
-public class DocumentStoreExtensionsTests
+public class EntityStoreTests
 {
     private readonly EntityId _entityId = EntityId.New(new EntityType(1));
     private readonly TestDocumentStore _store;
+    private readonly EntityStore _entityStore;
 
-    public DocumentStoreExtensionsTests()
+    public EntityStoreTests()
     {
         _store = new TestDocumentStore();
+        _entityStore = new EntityStore(_store, new DefaultJsonConverter(new JsonConverterSettings()));
     }
 
     [Fact]
     public async Task UpdateEntities_Update()
     {
-        await _store.UpdateEntities(new JsonEntity<string>(_entityId, "Value", 0));
+        await _entityStore.UpdateEntities(new JsonEntity<string>(_entityId, "Value", 0));
 
-        JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
+        JsonEntity<string> entity = await _entityStore.GetEntity<string>(_entityId);
 
         Assert.Equal(_entityId, entity.Id);
         Assert.Equal("Value", entity.Entity);
@@ -44,11 +46,11 @@ public class DocumentStoreExtensionsTests
     {
         await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
 
-        await _store.UpdateEntities(
+        await _entityStore.UpdateEntities(
             new IJsonEntity<object>[0],
             new[] { new JsonEntity<string>(_entityId, null, 1) });
 
-        JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
+        JsonEntity<string> entity = await _entityStore.GetEntity<string>(_entityId);
 
         Assert.Equal(_entityId, entity.Id);
         Assert.Equal("Value", entity.Entity);
@@ -61,10 +63,10 @@ public class DocumentStoreExtensionsTests
         JsonEntity<string> entity1 = JsonEntity<string>.Create("Value", new EntityType(1));
         JsonEntity<int[]> entity2 = JsonEntity<int[]>.Create(new[] { 1, 2, 3 }, new EntityType(2));
 
-        await _store.UpdateEntities(entity1, entity2);
+        await _entityStore.UpdateEntities(entity1, entity2);
 
-        JsonEntity<string> result1 = await _store.GetEntity<string>(entity1.Id);
-        JsonEntity<int[]> result2 = await _store.GetEntity<int[]>(entity2.Id);
+        JsonEntity<string> result1 = await _entityStore.GetEntity<string>(entity1.Id);
+        JsonEntity<int[]> result2 = await _entityStore.GetEntity<int[]>(entity2.Id);
 
         Assert.Equal(entity1.Id, result1.Id);
         Assert.Equal("Value", result1.Entity);
@@ -79,7 +81,7 @@ public class DocumentStoreExtensionsTests
     {
         await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
 
-        JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
+        JsonEntity<string> entity = await _entityStore.GetEntity<string>(_entityId);
 
         Assert.Equal(_entityId, entity.Id);
         Assert.Equal("Value", entity.Entity);
@@ -89,7 +91,7 @@ public class DocumentStoreExtensionsTests
     [Fact]
     public async Task GetEntity_NotFound()
     {
-        JsonEntity<string> entity = await _store.GetEntity<string>(_entityId);
+        JsonEntity<string> entity = await _entityStore.GetEntity<string>(_entityId);
 
         Assert.Equal(_entityId, entity.Id);
         Assert.Null(entity.Entity);

@@ -19,21 +19,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public static class DocumentStoreExtensions
+public class EntityStore
 {
-    /// <summary>
-    /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
-    /// </summary>
-    /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
-    /// base version.</exception>
-    public static async Task UpdateEntities(
-        this IDocumentStore documentStore,
-        IEnumerable<IJsonEntity<object>> updatedDocuments,
-        IEnumerable<IJsonEntity<object>> checkedDocuments)
+    private readonly IDocumentStore _documentStore;
+    private readonly IJsonConverter _jsonConverter;
+
+    public EntityStore(IDocumentStore documentStore, IJsonConverter jsonConverter)
     {
-        await documentStore.UpdateDocuments(
-            updatedDocuments.Select(JsonEntityExtensions.AsDocument),
-            checkedDocuments.Select(JsonEntityExtensions.AsDocument));
+        _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+        _jsonConverter = jsonConverter ?? throw new ArgumentNullException(nameof(jsonConverter));
     }
 
     /// <summary>
@@ -41,20 +35,40 @@ public static class DocumentStoreExtensions
     /// </summary>
     /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
     /// base version.</exception>
-    public static async Task UpdateEntities(
-        this IDocumentStore documentStore,
-        params IJsonEntity<object>[] updatedDocuments)
+    public async Task UpdateEntities(
+        IEnumerable<IJsonEntity<object>> updatedDocuments,
+        IEnumerable<IJsonEntity<object>> checkedDocuments)
     {
-        await documentStore.UpdateEntities(updatedDocuments, Array.Empty<IJsonEntity<object>>());
+        await _documentStore.UpdateDocuments(
+            updatedDocuments.Select(_jsonConverter.ToDocument),
+            checkedDocuments.Select(_jsonConverter.ToDocument));
+    }
+
+    /// <summary>
+    /// Updates atomically the body of multiple documents represented as <see cref="IJsonEntity{T}"/> objects.
+    /// </summary>
+    /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
+    /// base version.</exception>
+    public async Task UpdateEntities(params IJsonEntity<object>[] updatedDocuments)
+    {
+        await UpdateEntities(updatedDocuments, Array.Empty<IJsonEntity<object>>());
     }
 
     /// <summary>
     /// Retrieves a document given its ID, represented as a <see cref="JsonEntity{T}"/> object.
     /// </summary>
-    public static async Task<JsonEntity<T>> GetEntity<T>(this IDocumentStore documentStore, EntityId id)
+    public async Task<JsonEntity<T>> GetEntity<T>(EntityId id)
         where T : class
     {
-        Document result = await documentStore.GetDocument(id.Value);
-        return JsonEntity<T>.FromDocument(result);
+        Document result = await _documentStore.GetDocument(id.Value);
+        return _jsonConverter.FromDocument<T>(result);
+    }
+
+    /// <summary>
+    /// Returns a new <see cref="BatchBuilder"/> object that can be used to update multiple documents atomically.
+    /// </summary>
+    public BatchBuilder CreateBatchBuilder()
+    {
+        return new BatchBuilder(_documentStore, _jsonConverter);
     }
 }

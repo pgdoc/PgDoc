@@ -29,14 +29,21 @@ public class BatchBuilderTests
     public BatchBuilderTests()
     {
         _store = new TestDocumentStore();
-        _builder = new BatchBuilder(_store);
+        _builder = new BatchBuilder(_store, new DefaultJsonConverter(new JsonConverterSettings()));
     }
 
     [Fact]
-    public void Constructor_Exception()
+    public void Constructor_NullConveter()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new BatchBuilder(null));
+            () => new BatchBuilder(_store, null));
+    }
+
+    [Fact]
+    public void Constructor_NullStore()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => new BatchBuilder(null, new DefaultJsonConverter(new JsonConverterSettings())));
     }
 
     [Fact]

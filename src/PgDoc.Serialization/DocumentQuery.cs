@@ -24,16 +24,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using Npgsql;
 
-public static class DocumentQuery
+public class DocumentQuery
 {
+    private readonly IJsonConverter _jsonConverter;
+
+    public DocumentQuery(IJsonConverter jsonConverter)
+    {
+        _jsonConverter = jsonConverter;
+    }
+
     /// <summary>
-    /// Executes a SQL query and converts the result into an asynchronous stream of <see cref="JsonEntity{T}"/>
-    /// objects. The query must return the id, body and version columns.
+    /// Executes a SQL query and converts the result into an asynchronous stream of <see cref="Document"/> objects.
+    /// The query must return the id, body and version columns.
     /// </summary>
-    public static async IAsyncEnumerable<JsonEntity<T>> Execute<T>(
+    public async IAsyncEnumerable<Document> Execute(
         NpgsqlCommand command,
         [EnumeratorCancellation] CancellationToken cancel = default)
-        where T : class
     {
         using (DbDataReader reader = await command.ExecuteReaderAsync(
             CommandBehavior.Default | CommandBehavior.SingleResult,
@@ -46,16 +52,39 @@ public static class DocumentQuery
                     (string)reader["body"],
                     (long)reader["version"]);
 
-                yield return JsonEntity<T>.FromDocument(document);
+                yield return document;
             }
         }
+    }
+
+    /// <summary>
+    /// Executes a SQL query and converts the result into an asynchronous stream of <see cref="JsonEntity{T}"/>
+    /// objects. The query must return the id, body and version columns.
+    /// </summary>
+    public IAsyncEnumerable<JsonEntity<T>> Execute<T>(
+        NpgsqlCommand command,
+        CancellationToken cancel = default)
+        where T : class
+    {
+        return Execute(command, cancel).Select(_jsonConverter.FromDocument<T>);
+    }
+
+    /// <summary>
+    /// Executes a SQL query and converts the result into a list of <see cref="Document"/> objects. The query
+    /// must return the id, body and version columns.
+    /// </summary>
+    public async Task<IReadOnlyList<Document>> ExecuteList(
+        NpgsqlCommand command,
+        CancellationToken cancel = default)
+    {
+        return (await Execute(command, cancel).ToListAsync(cancel)).AsReadOnly();
     }
 
     /// <summary>
     /// Executes a SQL query and converts the result into a list of <see cref="JsonEntity{T}"/> objects. The query
     /// must return the id, body and version columns.
     /// </summary>
-    public static async Task<IReadOnlyList<JsonEntity<T>>> ExecuteList<T>(
+    public async Task<IReadOnlyList<JsonEntity<T>>> ExecuteList<T>(
         NpgsqlCommand command,
         CancellationToken cancel = default)
         where T : class

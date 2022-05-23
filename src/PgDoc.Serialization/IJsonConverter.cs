@@ -14,20 +14,9 @@
 
 namespace PgDoc.Serialization;
 
-using Newtonsoft.Json;
-
-public static class JsonEntityExtensions
+public interface IJsonConverter
 {
-    /// <summary>
-    /// Converts a <see cref="IJsonEntity{T}"/> object to a <see cref="Document"/> object by serializing its body
-    /// to JSON.
-    /// </summary>
-    public static Document AsDocument<T>(this IJsonEntity<T> jsonEntity)
-        where T : class
-    {
-        return new Document(
-            jsonEntity.Id.Value,
-            jsonEntity.Entity == null ? null : JsonConvert.SerializeObject(jsonEntity.Entity, JsonSettings.Settings),
-            jsonEntity.Version);
-    }
+    T FromJson<T>(string json);
+
+    string ToJson<T>(T value);
 }

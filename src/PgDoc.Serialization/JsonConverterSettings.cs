@@ -17,11 +17,20 @@ namespace PgDoc.Serialization;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-public class JsonSettings
+public class JsonConverterSettings
 {
-    public static JsonSerializerSettings Settings { get; }
+    public JsonConverterSettings(JsonSerializerSettings settings)
+    {
+        Settings = settings;
+    }
 
-    static JsonSettings()
+    public JsonConverterSettings()
+        : this(GetDefaultSettings())
+    { }
+
+    public JsonSerializerSettings Settings { get; }
+
+    public static JsonSerializerSettings GetDefaultSettings()
     {
         List<JsonConverter> converters = new()
         {
@@ -30,7 +39,7 @@ public class JsonSettings
             new EntityIdConverter()
         };
 
-        Settings = new JsonSerializerSettings()
+        return new JsonSerializerSettings()
         {
             Converters = converters,
             Formatting = Formatting.None

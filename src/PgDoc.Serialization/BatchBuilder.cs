@@ -18,15 +18,20 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Represents a batch of updates to be performed atomically.
+/// </summary>
 public class BatchBuilder
 {
-    private readonly IDocumentStore _dataStore;
+    private readonly IDocumentStore _documentStore;
+    private readonly IJsonConverter _jsonConverter;
     private readonly Dictionary<Guid, Document> _checkedDocuments = new();
     private readonly Dictionary<Guid, Document> _modifiedDocuments = new();
 
-    public BatchBuilder(IDocumentStore store)
+    public BatchBuilder(IDocumentStore documentStore, IJsonConverter jsonConverter)
     {
-        _dataStore = store ?? throw new ArgumentNullException(nameof(store));
+        _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
+        _jsonConverter = jsonConverter ?? throw new ArgumentNullException(nameof(jsonConverter));
     }
 
     public void Check(params Document[] documents)
@@ -61,7 +66,7 @@ public class BatchBuilder
     public void Check<T>(IJsonEntity<T> document)
         where T : class
     {
-        Check(document.AsDocument());
+        Check(_jsonConverter.ToDocument(document));
     }
 
     public void Modify(params Document[] documents)
@@ -97,12 +102,12 @@ public class BatchBuilder
     public void Modify<T>(IJsonEntity<T> document)
         where T : class
     {
-        Modify(document.AsDocument());
+        Modify(_jsonConverter.ToDocument(document));
     }
 
     public async Task Submit()
     {
-        await _dataStore.UpdateDocuments(_modifiedDocuments.Values, _checkedDocuments.Values);
+        await _documentStore.UpdateDocuments(_modifiedDocuments.Values, _checkedDocuments.Values);
 
         _checkedDocuments.Clear();
         _modifiedDocuments.Clear();

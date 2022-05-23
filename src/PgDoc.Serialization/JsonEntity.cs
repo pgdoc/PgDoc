@@ -14,8 +14,6 @@
 
 namespace PgDoc.Serialization;
 
-using Newtonsoft.Json;
-
 /// <summary>
 ///  Represents a document composed of a unique ID, a deserialized JSON body and a version number.
 /// </summary>
@@ -44,17 +42,6 @@ public class JsonEntity<T> : IJsonEntity<T>
     /// Gets the current version of the document.
     /// </summary>
     public long Version { get; }
-
-    /// <summary>
-    /// Converts a <see cref="Document"/> object to a <see cref="JsonEntity{T}"/> by deserializing its JSON body.
-    /// </summary>
-    public static JsonEntity<T> FromDocument(Document document)
-    {
-        return new JsonEntity<T>(
-            new EntityId(document.Id),
-            document.Body != null ? (T?)JsonConvert.DeserializeObject(document.Body, typeof(T), JsonSettings.Settings) : null,
-            document.Version);
-    }
 
     /// <summary>
     /// Returns a copy of this <see cref="JsonEntity{T}"/> object with the same ID and version, but replaces the

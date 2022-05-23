@@ -21,9 +21,11 @@ using Xunit;
 
 public class DocumentQueryTests
 {
-    private readonly NpgsqlConnection _connection;
+    private readonly DocumentQuery _documentQuery;
 
+    private readonly NpgsqlConnection _connection;
     private readonly SqlDocumentStore _store;
+    private readonly EntityStore _entityStore;
 
     public DocumentQueryTests()
     {
@@ -35,19 +37,23 @@ public class DocumentQueryTests
         NpgsqlCommand command = _connection.CreateCommand();
         command.CommandText = @"TRUNCATE TABLE document;";
         command.ExecuteNonQuery();
+
+        DefaultJsonConverter jsonConverter = new(new JsonConverterSettings());
+        _entityStore = new EntityStore(_store, jsonConverter);
+        _documentQuery = new DocumentQuery(jsonConverter);
     }
 
     [Fact]
     public async Task ExecuteList_Success()
     {
         JsonEntity<TestObject> entity = JsonEntity<TestObject>.Create(new TestObject() { Value = "abcd" });
-        await _store.UpdateEntities(entity);
+        await _entityStore.UpdateEntities(entity);
 
         _connection.CreateCommand();
         NpgsqlCommand command = _connection.CreateCommand();
         command.CommandText = "SELECT id, body, version FROM document";
 
-        IReadOnlyList<JsonEntity<TestObject>> result = await DocumentQuery.ExecuteList<TestObject>(command);
+        IReadOnlyList<JsonEntity<TestObject>> result = await _documentQuery.ExecuteList<TestObject>(command);
 
         Assert.Equal(1, result.Count);
         Assert.Equal(entity.Id, result[0].Id);
