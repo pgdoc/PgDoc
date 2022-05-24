@@ -29,7 +29,7 @@ public class BatchBuilderTests
     public BatchBuilderTests()
     {
         _store = new TestDocumentStore();
-        _builder = new BatchBuilder(_store, new DefaultJsonConverter(new JsonConverterSettings()));
+        _builder = new BatchBuilder(_store, new DefaultJsonConverter(DefaultJsonConverter.GetDefaultSettings()));
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class BatchBuilderTests
     public void Constructor_NullStore()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new BatchBuilder(null, new DefaultJsonConverter(new JsonConverterSettings())));
+            () => new BatchBuilder(null, new DefaultJsonConverter(DefaultJsonConverter.GetDefaultSettings())));
     }
 
     [Fact]

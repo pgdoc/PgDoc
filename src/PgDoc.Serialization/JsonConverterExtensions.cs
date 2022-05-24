@@ -13,6 +13,7 @@
 // limitations under the License.
 
 namespace PgDoc.Serialization;
+
 public static class JsonConverterExtensions
 {
     /// <summary>

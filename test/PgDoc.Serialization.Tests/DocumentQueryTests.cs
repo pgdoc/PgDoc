@@ -38,7 +38,7 @@ public class DocumentQueryTests
         command.CommandText = @"TRUNCATE TABLE document;";
         command.ExecuteNonQuery();
 
-        DefaultJsonConverter jsonConverter = new(new JsonConverterSettings());
+        DefaultJsonConverter jsonConverter = new(DefaultJsonConverter.GetDefaultSettings());
         _entityStore = new EntityStore(_store, jsonConverter);
         _documentQuery = new DocumentQuery(jsonConverter);
     }

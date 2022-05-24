@@ -26,7 +26,7 @@ public class EntityStoreTests
     public EntityStoreTests()
     {
         _store = new TestDocumentStore();
-        _entityStore = new EntityStore(_store, new DefaultJsonConverter(new JsonConverterSettings()));
+        _entityStore = new EntityStore(_store, new DefaultJsonConverter(DefaultJsonConverter.GetDefaultSettings()));
     }
 
     [Fact]

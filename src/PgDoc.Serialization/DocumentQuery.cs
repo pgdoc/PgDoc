@@ -70,17 +70,6 @@ public class DocumentQuery
     }
 
     /// <summary>
-    /// Executes a SQL query and converts the result into a list of <see cref="Document"/> objects. The query
-    /// must return the id, body and version columns.
-    /// </summary>
-    public async Task<IReadOnlyList<Document>> ExecuteList(
-        NpgsqlCommand command,
-        CancellationToken cancel = default)
-    {
-        return (await Execute(command, cancel).ToListAsync(cancel)).AsReadOnly();
-    }
-
-    /// <summary>
     /// Executes a SQL query and converts the result into a list of <see cref="JsonEntity{T}"/> objects. The query
     /// must return the id, body and version columns.
     /// </summary>

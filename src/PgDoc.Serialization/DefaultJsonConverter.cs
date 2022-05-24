@@ -14,20 +14,22 @@
 
 namespace PgDoc.Serialization;
 
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 public class DefaultJsonConverter : IJsonConverter
 {
-    private readonly JsonConverterSettings _jsonConverterSettings;
+    private readonly JsonSerializerSettings _jsonSerializerSettings;
 
-    public DefaultJsonConverter(JsonConverterSettings jsonConverterSettings)
+    public DefaultJsonConverter(JsonSerializerSettings jsonSerializerSettings)
     {
-        _jsonConverterSettings = jsonConverterSettings;
+        _jsonSerializerSettings = jsonSerializerSettings;
     }
 
+    /// <inheritdoc />
     public T FromJson<T>(string json)
     {
-        T? result = JsonConvert.DeserializeObject<T>(json, _jsonConverterSettings.Settings);
+        T? result = JsonConvert.DeserializeObject<T>(json, _jsonSerializerSettings);
 
         if (result != null)
             return result;
@@ -35,8 +37,25 @@ public class DefaultJsonConverter : IJsonConverter
             throw new JsonException("Unable to deserialize JSON.");
     }
 
+    /// <inheritdoc />
     public string ToJson<T>(T value)
     {
-        return JsonConvert.SerializeObject(value, _jsonConverterSettings.Settings);
+        return JsonConvert.SerializeObject(value, _jsonSerializerSettings);
+    }
+
+    public static JsonSerializerSettings GetDefaultSettings()
+    {
+        List<JsonConverter> converters = new()
+        {
+            new UnixTimeConverter(),
+            new ByteArrayConverter(),
+            new EntityIdConverter()
+        };
+
+        return new JsonSerializerSettings()
+        {
+            Converters = converters,
+            Formatting = Formatting.None
+        };
     }
 }
