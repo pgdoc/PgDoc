@@ -6,5 +6,5 @@ public class PgDocOptions
 {
     public string? ConnectionString { get; set; }
 
-    public JsonSerializerSettings JsonSerializerSettings { get; set; } = DefaultJsonConverter.GetDefaultSettings();
+    public JsonSerializerSettings JsonSerializerSettings { get; set; } = DefaultJsonSerializer.GetDefaultSettings();
 }

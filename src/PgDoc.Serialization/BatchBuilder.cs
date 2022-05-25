@@ -24,14 +24,14 @@ using System.Threading.Tasks;
 public class BatchBuilder
 {
     private readonly IDocumentStore _documentStore;
-    private readonly IJsonConverter _jsonConverter;
+    private readonly IJsonSerializer _jsonSerializer;
     private readonly Dictionary<Guid, Document> _checkedDocuments = new();
     private readonly Dictionary<Guid, Document> _modifiedDocuments = new();
 
-    public BatchBuilder(IDocumentStore documentStore, IJsonConverter jsonConverter)
+    public BatchBuilder(IDocumentStore documentStore, IJsonSerializer jsonSerializer)
     {
         _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
-        _jsonConverter = jsonConverter ?? throw new ArgumentNullException(nameof(jsonConverter));
+        _jsonSerializer = jsonSerializer ?? throw new ArgumentNullException(nameof(jsonSerializer));
     }
 
     public void Check(params Document[] documents)
@@ -66,7 +66,7 @@ public class BatchBuilder
     public void Check<T>(IJsonEntity<T> document)
         where T : class
     {
-        Check(_jsonConverter.ToDocument(document));
+        Check(_jsonSerializer.ToDocument(document));
     }
 
     public void Modify(params Document[] documents)
@@ -102,7 +102,7 @@ public class BatchBuilder
     public void Modify<T>(IJsonEntity<T> document)
         where T : class
     {
-        Modify(_jsonConverter.ToDocument(document));
+        Modify(_jsonSerializer.ToDocument(document));
     }
 
     public async Task Submit()

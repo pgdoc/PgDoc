@@ -18,15 +18,15 @@ using System;
 using System.Text.RegularExpressions;
 using Xunit;
 
-public class JsonConverterExtensionsTests
+public class JsonSerializerExtensionsTests
 {
-    private readonly IJsonConverter _converter;
+    private readonly IJsonSerializer _serializer;
 
     private static readonly Guid _guid = Guid.Parse("f81428a9-0bd9-4d75-95bf-976225f24cf1");
 
-    public JsonConverterExtensionsTests()
+    public JsonSerializerExtensionsTests()
     {
-        _converter = new DefaultJsonConverter(DefaultJsonConverter.GetDefaultSettings());
+        _serializer = new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultSettings());
     }
 
     [Fact]
@@ -39,8 +39,8 @@ public class JsonConverterExtensionsTests
 
         JsonEntity<TestObject> entity = new(new EntityId(_guid), testObject, 10);
 
-        Document document = _converter.ToDocument(entity);
-        JsonEntity<TestObject> result = _converter.FromDocument<TestObject>(document);
+        Document document = _serializer.ToDocument(entity);
+        JsonEntity<TestObject> result = _serializer.FromDocument<TestObject>(document);
 
         const string expectedJson = """
             {
@@ -62,8 +62,8 @@ public class JsonConverterExtensionsTests
     {
         JsonEntity<TestObject> entity = new(new EntityId(_guid), null, 10);
 
-        Document document = _converter.ToDocument(entity);
-        JsonEntity<TestObject> result = _converter.FromDocument<TestObject>(document);
+        Document document = _serializer.ToDocument(entity);
+        JsonEntity<TestObject> result = _serializer.FromDocument<TestObject>(document);
 
         Assert.Equal(_guid, document.Id);
         Assert.Equal(10, document.Version);

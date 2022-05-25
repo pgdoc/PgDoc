@@ -22,12 +22,12 @@ using System.Threading.Tasks;
 public class EntityStore
 {
     private readonly IDocumentStore _documentStore;
-    private readonly IJsonConverter _jsonConverter;
+    private readonly IJsonSerializer _jsonSerializer;
 
-    public EntityStore(IDocumentStore documentStore, IJsonConverter jsonConverter)
+    public EntityStore(IDocumentStore documentStore, IJsonSerializer jsonSerializer)
     {
         _documentStore = documentStore ?? throw new ArgumentNullException(nameof(documentStore));
-        _jsonConverter = jsonConverter ?? throw new ArgumentNullException(nameof(jsonConverter));
+        _jsonSerializer = jsonSerializer ?? throw new ArgumentNullException(nameof(jsonSerializer));
     }
 
     /// <summary>
@@ -40,8 +40,8 @@ public class EntityStore
         IEnumerable<IJsonEntity<object>> checkedDocuments)
     {
         await _documentStore.UpdateDocuments(
-            updatedDocuments.Select(_jsonConverter.ToDocument),
-            checkedDocuments.Select(_jsonConverter.ToDocument));
+            updatedDocuments.Select(_jsonSerializer.ToDocument),
+            checkedDocuments.Select(_jsonSerializer.ToDocument));
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public class EntityStore
         where T : class
     {
         Document result = await _documentStore.GetDocument(id.Value);
-        return _jsonConverter.FromDocument<T>(result);
+        return _jsonSerializer.FromDocument<T>(result);
     }
 
     /// <summary>
@@ -69,6 +69,6 @@ public class EntityStore
     /// </summary>
     public BatchBuilder CreateBatchBuilder()
     {
-        return new BatchBuilder(_documentStore, _jsonConverter);
+        return new BatchBuilder(_documentStore, _jsonSerializer);
     }
 }

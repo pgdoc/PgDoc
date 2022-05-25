@@ -17,17 +17,17 @@ namespace PgDoc.Serialization;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-public class DefaultJsonConverter : IJsonConverter
+public class DefaultJsonSerializer : IJsonSerializer
 {
     private readonly JsonSerializerSettings _jsonSerializerSettings;
 
-    public DefaultJsonConverter(JsonSerializerSettings jsonSerializerSettings)
+    public DefaultJsonSerializer(JsonSerializerSettings jsonSerializerSettings)
     {
         _jsonSerializerSettings = jsonSerializerSettings;
     }
 
     /// <inheritdoc />
-    public T FromJson<T>(string json)
+    public T Deserialize<T>(string json)
     {
         T? result = JsonConvert.DeserializeObject<T>(json, _jsonSerializerSettings);
 
@@ -38,7 +38,7 @@ public class DefaultJsonConverter : IJsonConverter
     }
 
     /// <inheritdoc />
-    public string ToJson<T>(T value)
+    public string Serialize<T>(T value)
     {
         return JsonConvert.SerializeObject(value, _jsonSerializerSettings);
     }

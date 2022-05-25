@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
         PgDocOptions options = new();
         configure(options);
 
-        serviceCollection.AddSingleton<IJsonConverter>(new DefaultJsonConverter(options.JsonSerializerSettings));
+        serviceCollection.AddSingleton<IJsonSerializer>(new DefaultJsonSerializer(options.JsonSerializerSettings));
 
         serviceCollection.AddScoped<IDocumentStore, SqlDocumentStore>();
 

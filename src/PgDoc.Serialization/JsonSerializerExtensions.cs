@@ -14,19 +14,19 @@
 
 namespace PgDoc.Serialization;
 
-public static class JsonConverterExtensions
+public static class JsonSerializerExtensions
 {
     /// <summary>
     /// Converts a <see cref="IJsonEntity{T}"/> object to a <see cref="Document"/> object by serializing its body
     /// to JSON.
     /// </summary>
-    public static Document ToDocument<T>(this IJsonConverter converter, IJsonEntity<T> jsonEntity)
+    public static Document ToDocument<T>(this IJsonSerializer serializer, IJsonEntity<T> jsonEntity)
         where T : class
     {
         return new Document(
             id: jsonEntity.Id.Value,
             body: jsonEntity.Entity != null
-                ? converter.ToJson(jsonEntity.Entity)
+                ? serializer.Serialize(jsonEntity.Entity)
                 : null,
             version: jsonEntity.Version);
     }
@@ -34,13 +34,13 @@ public static class JsonConverterExtensions
     /// <summary>
     /// Converts a <see cref="Document"/> object to a <see cref="JsonEntity{T}"/> by deserializing its JSON body.
     /// </summary>
-    public static JsonEntity<T> FromDocument<T>(this IJsonConverter converter, Document document)
+    public static JsonEntity<T> FromDocument<T>(this IJsonSerializer serializer, Document document)
         where T : class
     {
         return new JsonEntity<T>(
             id: new EntityId(document.Id),
             entity: document.Body != null
-                ? converter.FromJson<T>(document.Body)
+                ? serializer.Deserialize<T>(document.Body)
                 : null,
             version: document.Version);
     }

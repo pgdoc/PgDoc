@@ -14,15 +14,15 @@
 
 namespace PgDoc.Serialization;
 
-public interface IJsonConverter
+public interface IJsonSerializer
 {
     /// <summary>
     /// Deserializes a JSON string to the specified type.
     /// </summary>
-    T FromJson<T>(string json);
+    T Deserialize<T>(string json);
 
     /// <summary>
     /// Serializes the specified object to a JSON string.
     /// </summary>
-    string ToJson<T>(T value);
+    string Serialize<T>(T value);
 }

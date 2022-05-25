@@ -21,20 +21,20 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Xunit;
 
-public class DefaultJsonConverterTests
+public class DefaultJsonSerializerTests
 {
-    private readonly IJsonConverter _converter;
+    private readonly IJsonSerializer _serializer;
 
     private static readonly EntityId _entityId = new(Guid.Parse("000a9d4a-78a1-4534-963a-37f1023a4022"));
     private static readonly byte[] _bytes = new byte[] { 10, 20, 30, 40, 50, 60, 70, 80 };
 
-    public DefaultJsonConverterTests()
+    public DefaultJsonSerializerTests()
     {
-        _converter = new DefaultJsonConverter(DefaultJsonConverter.GetDefaultSettings());
+        _serializer = new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultSettings());
     }
 
     [Fact]
-    public void ToJson_Success()
+    public void Deserialize_Success()
     {
         TestObject testObject = new()
         {
@@ -48,8 +48,8 @@ public class DefaultJsonConverterTests
             ListValue = ImmutableList<string>.Empty.Add("a").Add("b").Add("c")
         };
 
-        string json = _converter.ToJson(testObject);
-        TestObject result = _converter.FromJson<TestObject>(json);
+        string json = _serializer.Serialize(testObject);
+        TestObject result = _serializer.Deserialize<TestObject>(json);
 
         const string expectedJson = """
             {
@@ -76,12 +76,12 @@ public class DefaultJsonConverterTests
     }
 
     [Fact]
-    public void ToJson_NullValues()
+    public void Deserialize_NullValues()
     {
         TestObject testObject = new();
 
-        string json = _converter.ToJson(testObject);
-        TestObject result = _converter.FromJson<TestObject>(json);
+        string json = _serializer.Serialize(testObject);
+        TestObject result = _serializer.Deserialize<TestObject>(json);
 
         const string expectedJson = """
             {
@@ -104,15 +104,15 @@ public class DefaultJsonConverterTests
     [InlineData(0)]
     [InlineData(long.MaxValue)]
     [InlineData(long.MinValue)]
-    public void ToJson_SerializeInt64(long value)
+    public void Deserialize_SerializeInt64(long value)
     {
         TestObject testObject = new()
         {
             Int64Value = value
         };
 
-        string json = _converter.ToJson(testObject);
-        TestObject result = _converter.FromJson<TestObject>(json);
+        string json = _serializer.Serialize(testObject);
+        TestObject result = _serializer.Deserialize<TestObject>(json);
 
         Assert.Equal(testObject, result);
     }
@@ -120,23 +120,23 @@ public class DefaultJsonConverterTests
     [Theory]
     [InlineData(null)]
     [InlineData("value")]
-    public void ToJson_SerializeString(string value)
+    public void Deserialize_SerializeString(string value)
     {
         TestObject testObject = new()
         {
             StringValue = value
         };
 
-        string json = _converter.ToJson(testObject);
-        TestObject result = _converter.FromJson<TestObject>(json);
+        string json = _serializer.Serialize(testObject);
+        TestObject result = _serializer.Deserialize<TestObject>(json);
 
         Assert.Equal(testObject, result);
     }
 
     [Fact]
-    public void ToJson_JsonSerializerSettings()
+    public void Deserialize_JsonSerializerSettings()
     {
-        IJsonConverter converter = new DefaultJsonConverter(
+        IJsonSerializer serializer = new DefaultJsonSerializer(
             new JsonSerializerSettings()
             {
                 ContractResolver = new DefaultContractResolver()
@@ -152,8 +152,8 @@ public class DefaultJsonConverterTests
             StringValue = "value"
         };
 
-        string json = converter.ToJson(testObject);
-        TestObject result = converter.FromJson<TestObject>(json);
+        string json = serializer.Serialize(testObject);
+        TestObject result = serializer.Deserialize<TestObject>(json);
 
         const string expectedJson = """
             {
@@ -168,10 +168,10 @@ public class DefaultJsonConverterTests
     [Theory]
     [InlineData("")]
     [InlineData("{")]
-    public void FromJson_Exception(string json)
+    public void Deserialize_Exception(string json)
     {
         Assert.ThrowsAny<JsonException>(
-            () => _converter.FromJson<TestObject>(json));
+            () => _serializer.Deserialize<TestObject>(json));
     }
 
     [JsonEntityType(5)]

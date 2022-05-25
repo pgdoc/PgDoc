@@ -26,11 +26,11 @@ using Npgsql;
 
 public class DocumentQuery
 {
-    private readonly IJsonConverter _jsonConverter;
+    private readonly IJsonSerializer _jsonSerializer;
 
-    public DocumentQuery(IJsonConverter jsonConverter)
+    public DocumentQuery(IJsonSerializer jsonSerializer)
     {
-        _jsonConverter = jsonConverter;
+        _jsonSerializer = jsonSerializer;
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public class DocumentQuery
         CancellationToken cancel = default)
         where T : class
     {
-        return Execute(command, cancel).Select(_jsonConverter.FromDocument<T>);
+        return Execute(command, cancel).Select(_jsonSerializer.FromDocument<T>);
     }
 
     /// <summary>
