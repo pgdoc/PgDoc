@@ -30,7 +30,7 @@ public class DocumentQuery
 
     public DocumentQuery(IJsonSerializer jsonSerializer)
     {
-        _jsonSerializer = jsonSerializer;
+        _jsonSerializer = jsonSerializer ?? throw new ArgumentNullException(nameof(jsonSerializer));
     }
 
     /// <summary>

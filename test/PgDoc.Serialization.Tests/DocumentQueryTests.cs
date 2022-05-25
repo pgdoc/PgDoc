@@ -14,6 +14,7 @@
 
 namespace PgDoc.Serialization.Tests;
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Npgsql;
@@ -59,6 +60,13 @@ public class DocumentQueryTests
         Assert.Equal(entity.Id, result[0].Id);
         Assert.Equal("abcd", result[0].Entity.Value);
         Assert.Equal(1, result[0].Version);
+    }
+
+    [Fact]
+    public void Constructor_NullSerializer()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => new DocumentQuery(null));
     }
 
     [JsonEntityType(1)]

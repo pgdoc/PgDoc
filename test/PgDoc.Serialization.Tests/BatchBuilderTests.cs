@@ -33,20 +33,6 @@ public class BatchBuilderTests
     }
 
     [Fact]
-    public void Constructor_NullConveter()
-    {
-        Assert.Throws<ArgumentNullException>(
-            () => new BatchBuilder(_store, null));
-    }
-
-    [Fact]
-    public void Constructor_NullStore()
-    {
-        Assert.Throws<ArgumentNullException>(
-            () => new BatchBuilder(null, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultSettings())));
-    }
-
-    [Fact]
     public async Task Submit_Success()
     {
         Check(_entityIds[0], 0);
@@ -161,6 +147,20 @@ public class BatchBuilderTests
 
         InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => Modify(_entityIds[0], 0));
         Assert.Equal($"Document {_entityIds[0].Value} is already being modified.", exception.Message);
+    }
+
+    [Fact]
+    public void Constructor_NullSerializer()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => new BatchBuilder(_store, null));
+    }
+
+    [Fact]
+    public void Constructor_NullStore()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => new BatchBuilder(null, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultSettings())));
     }
 
     private void Modify(EntityId entityId, long version)

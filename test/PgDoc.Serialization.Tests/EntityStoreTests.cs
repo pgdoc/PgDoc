@@ -14,6 +14,7 @@
 
 namespace PgDoc.Serialization.Tests;
 
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -96,5 +97,27 @@ public class EntityStoreTests
         Assert.Equal(_entityId, entity.Id);
         Assert.Null(entity.Entity);
         Assert.Equal(0, entity.Version);
+    }
+
+    [Fact]
+    public void CreateBatchBuilder_Success()
+    {
+        BatchBuilder batchBuilder = _entityStore.CreateBatchBuilder();
+
+        Assert.NotNull(batchBuilder);
+    }
+
+    [Fact]
+    public void Constructor_NullSerializer()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => new EntityStore(_store, null));
+    }
+
+    [Fact]
+    public void Constructor_NullStore()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => new EntityStore(null, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultSettings())));
     }
 }

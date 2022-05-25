@@ -15,8 +15,6 @@
 namespace PgDoc.Serialization.Tests;
 
 using System;
-using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 using Xunit;
 
 public class JsonEntityTests
