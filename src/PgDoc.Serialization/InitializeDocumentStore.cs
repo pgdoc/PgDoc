@@ -14,19 +14,22 @@
 
 namespace PgDoc.Serialization;
 
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
 
-public class InitializeDocumentStoreAttribute : Attribute, IAsyncActionFilter
+public class InitializeDocumentStore : IAsyncActionFilter
 {
+    private readonly IDocumentStore _documentStore;
+
+    public InitializeDocumentStore(IDocumentStore documentStore)
+    {
+        _documentStore = documentStore;
+    }
+
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        IDocumentStore? documentStore = context.HttpContext.RequestServices.GetService<IDocumentStore>();
-
-        if (documentStore != null)
-            await documentStore.Initialize();
+        if (_documentStore != null)
+            await _documentStore.Initialize();
 
         await next();
     }

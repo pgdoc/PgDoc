@@ -15,6 +15,7 @@
 namespace PgDoc.Serialization.Tests;
 
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Xunit;
 
 public class ServiceCollectionExtensionsTests
@@ -22,19 +23,95 @@ public class ServiceCollectionExtensionsTests
     private readonly ServiceCollection _serviceCollection = new();
 
     [Fact]
-    public void AddPgDoc_Success()
+    public void AddPgDoc_ConnectionString()
     {
-        _serviceCollection.AddPgDoc(options =>
+        _serviceCollection.AddPgDoc("Host=host");
+
+        ServiceProvider serviceProvider = _serviceCollection.BuildServiceProvider();
+
+        AssertServices(serviceProvider, "Host=host");
+    }
+
+    [Fact]
+    public void AddPgDoc_Options()
+    {
+        _serviceCollection.AddPgDoc(new PgDocOptions()
         {
-            options.ConnectionString = "Host=localhost";
+            ConnectionString = "Host=host"
         });
 
         ServiceProvider serviceProvider = _serviceCollection.BuildServiceProvider();
 
-        EntityStore entityStore = serviceProvider.GetRequiredService<EntityStore>();
-        DocumentQuery documentQuery = serviceProvider.GetRequiredService<DocumentQuery>();
+        AssertServices(serviceProvider, "Host=host");
+    }
 
-        Assert.NotNull(entityStore);
-        Assert.NotNull(documentQuery);
+    [Fact]
+    public void AddPgDoc_ActionOption()
+    {
+        _serviceCollection.AddPgDoc(options =>
+        {
+            options.ConnectionString = "Host=host";
+        });
+
+        ServiceProvider serviceProvider = _serviceCollection.BuildServiceProvider();
+
+        AssertServices(serviceProvider, "Host=host");
+    }
+
+    [Fact]
+    public void AddPgDoc_OptionsBuilder()
+    {
+        _serviceCollection.AddPgDoc(services =>
+        {
+            return new PgDocOptions()
+            {
+                ConnectionString = "Host=host"
+            };
+        });
+
+        ServiceProvider serviceProvider = _serviceCollection.BuildServiceProvider();
+
+        AssertServices(serviceProvider, "Host=host");
+    }
+
+    [Fact]
+    public void AddPgDoc_ConfigureBeforeAdd()
+    {
+        _serviceCollection.ConfigurePgDoc((_, options) =>
+        {
+            options.ConnectionString = "Host=host1";
+        });
+
+        _serviceCollection.AddPgDoc("Host=host2");
+
+        ServiceProvider serviceProvider = _serviceCollection.BuildServiceProvider();
+
+        AssertServices(serviceProvider, "Host=host1");
+    }
+
+    [Fact]
+    public void AddPgDoc_ConfigureAfterAdd()
+    {
+        _serviceCollection.AddPgDoc("Host=host1");
+
+        _serviceCollection.ConfigurePgDoc((_, options) =>
+        {
+            options.ConnectionString = "Host=host2";
+        });
+
+        ServiceProvider serviceProvider = _serviceCollection.BuildServiceProvider();
+
+        AssertServices(serviceProvider, "Host=host2");
+    }
+
+    private static void AssertServices(ServiceProvider serviceProvider, string connectionString)
+    {
+        NpgsqlConnection connection = serviceProvider.GetService<NpgsqlConnection>();
+        Assert.NotNull(connection);
+        Assert.NotNull(serviceProvider.GetService<EntityStore>());
+        Assert.NotNull(serviceProvider.GetService<ISqlDocumentStore>());
+        Assert.NotNull(serviceProvider.GetService<IDocumentStore>());
+        Assert.NotNull(serviceProvider.GetService<IJsonSerializer>());
+        Assert.Equal(connectionString, connection.ConnectionString);
     }
 }

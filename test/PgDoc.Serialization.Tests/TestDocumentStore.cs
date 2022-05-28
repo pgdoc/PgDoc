@@ -23,8 +23,11 @@ public class TestDocumentStore : IDocumentStore
 {
     public IDictionary<Guid, Tuple<string, long>> Store { get; } = new Dictionary<Guid, Tuple<string, long>>();
 
+    public bool Initialized { get; private set; } = false;
+
     public Task Initialize()
     {
+        Initialized = true;
         return Task.FromResult(0);
     }
 
