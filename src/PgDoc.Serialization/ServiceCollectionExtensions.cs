@@ -62,7 +62,7 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddSingleton<IJsonSerializer>(services =>
         {
             PgDocOptions options = services.GetRequiredService<PgDocOptions>();
-            return new DefaultJsonSerializer(options.JsonSerializerSettings);
+            return new DefaultJsonSerializer(options.JsonSerializerOptions);
         });
 
         serviceCollection.AddScoped<NpgsqlConnection>(services =>

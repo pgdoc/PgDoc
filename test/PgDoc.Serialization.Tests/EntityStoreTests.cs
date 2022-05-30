@@ -27,7 +27,7 @@ public class EntityStoreTests
     public EntityStoreTests()
     {
         _store = new TestDocumentStore();
-        _entityStore = new EntityStore(_store, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultSettings()));
+        _entityStore = new EntityStore(_store, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultOptions()));
     }
 
     [Fact]
@@ -118,6 +118,6 @@ public class EntityStoreTests
     public void Constructor_NullStore()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new EntityStore(null, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultSettings())));
+            () => new EntityStore(null, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultOptions())));
     }
 }

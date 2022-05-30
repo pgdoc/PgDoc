@@ -16,9 +16,9 @@ namespace PgDoc.Serialization.Tests;
 
 using System;
 using System.Collections.Immutable;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Xunit;
 
 public class DefaultJsonSerializerTests
@@ -30,7 +30,7 @@ public class DefaultJsonSerializerTests
 
     public DefaultJsonSerializerTests()
     {
-        _serializer = new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultSettings());
+        _serializer = new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultOptions());
     }
 
     [Fact]
@@ -45,6 +45,7 @@ public class DefaultJsonSerializerTests
             DateValue = new DateTime(2010, 6, 5, 4, 3, 2, DateTimeKind.Utc),
             NullableDateValue = new DateTime(2011, 9, 8, 7, 5, 4, DateTimeKind.Utc),
             EntityIdValue = _entityId,
+            EnumValue = DateTimeKind.Utc,
             ListValue = ImmutableList<string>.Empty.Add("a").Add("b").Add("c")
         };
 
@@ -60,6 +61,7 @@ public class DefaultJsonSerializerTests
                 "NullableDateValue": 1315465504,
                 "DateValue": 1275710582,
                 "EntityIdValue": "000a9d4a-78a1-4534-963a-37f1023a4022",
+                "EnumValue": "Utc",
                 "ListValue": ["a", "b", "c"]
             }
         """;
@@ -72,6 +74,7 @@ public class DefaultJsonSerializerTests
         Assert.Equal(new DateTime(2010, 6, 5, 4, 3, 2), result.DateValue);
         Assert.Equal(DateTimeKind.Utc, result.DateValue.Kind);
         Assert.Equal(_entityId, result.EntityIdValue);
+        Assert.Equal(DateTimeKind.Utc, result.EnumValue);
         Assert.Equal(new string[] { "a", "b", "c" }, result.ListValue);
     }
 
@@ -87,11 +90,12 @@ public class DefaultJsonSerializerTests
             {
                 "StringValue": null,
                 "Int64Value": 0,
-                "DecimalValue": 0.0,
+                "DecimalValue": 0,
                 "ByteValue": null,
                 "NullableDateValue": null,
                 "DateValue": -62135596800,
                 "EntityIdValue": null,
+                "EnumValue": "Unspecified",
                 "ListValue": null
             }
         """;
@@ -136,20 +140,16 @@ public class DefaultJsonSerializerTests
     [Fact]
     public void Deserialize_JsonSerializerSettings()
     {
-        IJsonSerializer serializer = new DefaultJsonSerializer(
-            new JsonSerializerSettings()
-            {
-                ContractResolver = new DefaultContractResolver()
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                },
-                NullValueHandling = NullValueHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.Ignore
-            });
+        JsonSerializerOptions options = new(DefaultJsonSerializer.GetDefaultOptions());
+        options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+
+        IJsonSerializer serializer = new DefaultJsonSerializer(options);
 
         TestObject testObject = new()
         {
-            StringValue = "value"
+            StringValue = "value",
+            EntityIdValue = _entityId
         };
 
         string json = serializer.Serialize(testObject);
@@ -157,7 +157,8 @@ public class DefaultJsonSerializerTests
 
         const string expectedJson = """
             {
-                "string_value": "value"
+                "stringValue": "value",
+                "entityIdValue": "000a9d4a-78a1-4534-963a-37f1023a4022"
             }
         """;
 
@@ -167,7 +168,7 @@ public class DefaultJsonSerializerTests
 
     [Theory]
     [InlineData("")]
-    [InlineData("{")]
+    [InlineData("null")]
     public void Deserialize_Exception(string json)
     {
         Assert.ThrowsAny<JsonException>(
@@ -190,6 +191,8 @@ public class DefaultJsonSerializerTests
         public DateTime DateValue { get; set; }
 
         public EntityId EntityIdValue { get; set; }
+
+        public DateTimeKind EnumValue { get; set; }
 
         public ImmutableList<string> ListValue { get; set; }
     }

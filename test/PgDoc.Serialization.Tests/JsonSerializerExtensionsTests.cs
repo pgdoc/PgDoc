@@ -26,7 +26,7 @@ public class JsonSerializerExtensionsTests
 
     public JsonSerializerExtensionsTests()
     {
-        _serializer = new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultSettings());
+        _serializer = new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultOptions());
     }
 
     [Fact]

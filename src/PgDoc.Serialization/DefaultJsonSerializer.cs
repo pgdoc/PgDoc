@@ -14,22 +14,24 @@
 
 namespace PgDoc.Serialization;
 
-using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class DefaultJsonSerializer : IJsonSerializer
 {
-    private readonly JsonSerializerSettings _jsonSerializerSettings;
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-    public DefaultJsonSerializer(JsonSerializerSettings jsonSerializerSettings)
+    public DefaultJsonSerializer(JsonSerializerOptions jsonSerializerOptions)
     {
-        _jsonSerializerSettings = jsonSerializerSettings;
+        _jsonSerializerOptions = jsonSerializerOptions;
     }
 
     /// <inheritdoc />
     public T Deserialize<T>(string json)
     {
-        T? result = JsonConvert.DeserializeObject<T>(json, _jsonSerializerSettings);
+        using JsonDocument jsonDocument = JsonDocument.Parse(json);
+
+        T? result = jsonDocument.Deserialize<T>(_jsonSerializerOptions);
 
         if (result != null)
             return result;
@@ -40,22 +42,17 @@ public class DefaultJsonSerializer : IJsonSerializer
     /// <inheritdoc />
     public string Serialize<T>(T value)
     {
-        return JsonConvert.SerializeObject(value, _jsonSerializerSettings);
+        return JsonSerializer.Serialize<T>(value, _jsonSerializerOptions);
     }
 
-    public static JsonSerializerSettings GetDefaultSettings()
+    public static JsonSerializerOptions GetDefaultOptions()
     {
-        List<JsonConverter> converters = new()
-        {
-            new UnixTimeConverter(),
-            new ByteArrayConverter(),
-            new EntityIdConverter()
-        };
+        JsonSerializerOptions result = new();
+        result.Converters.Add(new UnixTimeConverter());
+        result.Converters.Add(new ByteArrayConverter());
+        result.Converters.Add(new EntityIdConverter());
+        result.Converters.Add(new JsonStringEnumConverter());
 
-        return new JsonSerializerSettings()
-        {
-            Converters = converters,
-            Formatting = Formatting.None
-        };
+        return result;
     }
 }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>2.0.1</VersionPrefix>
+    <VersionPrefix>2.1.0</VersionPrefix>
     <Title>PgDoc.Serialization</Title>
     <Description>PgDoc.Serialization is a library for serializing .NET objects to JSON and store them into a PostgreSQL document store.</Description>
     <Authors>Flavien Charlon</Authors>
@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
     <PackageReference Include="PgDoc" Version="2.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="System.Text.Json" Version="6.0.4" />
   </ItemGroup>
 
 </Project>

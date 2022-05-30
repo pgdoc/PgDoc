@@ -15,35 +15,22 @@
 namespace PgDoc.Serialization;
 
 using System;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-public class UnixTimeConverter : JsonConverter
+public class UnixTimeConverter : JsonConverter<DateTime>
 {
     private static readonly DateTime _epoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
-    public override bool CanConvert(Type objectType)
+    public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return objectType == typeof(DateTime) || objectType == typeof(DateTime?);
+        long encodedData = reader.GetInt64();
+        return _epoch + TimeSpan.FromSeconds(encodedData);
     }
 
-    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+    public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
     {
-        if (reader.Value == null)
-        {
-            return null;
-        }
-        else
-        {
-            long encodedData = (long)reader.Value;
-            return _epoch + TimeSpan.FromSeconds(encodedData);
-        }
-    }
-
-    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-    {
-        DateTime date = (DateTime)value!;
-
-        writer.WriteValue(FromDate(date));
+        writer.WriteNumberValue(FromDate(value));
     }
 
     public static long FromDate(DateTime date)

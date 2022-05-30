@@ -15,32 +15,18 @@
 namespace PgDoc.Serialization;
 
 using System;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-public class EntityIdConverter : JsonConverter
+public class EntityIdConverter : JsonConverter<EntityId>
 {
-    public override bool CanConvert(Type objectType)
+    public override EntityId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return objectType == typeof(EntityId);
+        return new EntityId(Guid.Parse(reader.GetString()!));
     }
 
-    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+    public override void Write(Utf8JsonWriter writer, EntityId value, JsonSerializerOptions options)
     {
-        string? encodedData = (string?)reader.Value;
-
-        if (encodedData == null)
-        {
-            return null;
-        }
-        else
-        {
-            return new EntityId(Guid.Parse(encodedData));
-        }
-    }
-
-    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-    {
-        EntityId data = (EntityId)value!;
-        writer.WriteValue(data.ToString());
+        writer.WriteStringValue(value.ToString());
     }
 }

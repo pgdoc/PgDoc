@@ -14,11 +14,11 @@
 
 namespace PgDoc.Serialization;
 
-using Newtonsoft.Json;
+using System.Text.Json;
 
 public class PgDocOptions
 {
     public string? ConnectionString { get; set; }
 
-    public JsonSerializerSettings JsonSerializerSettings { get; set; } = DefaultJsonSerializer.GetDefaultSettings();
+    public JsonSerializerOptions JsonSerializerOptions { get; set; } = DefaultJsonSerializer.GetDefaultOptions();
 }

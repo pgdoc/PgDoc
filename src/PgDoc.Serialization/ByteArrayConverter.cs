@@ -15,33 +15,18 @@
 namespace PgDoc.Serialization;
 
 using System;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-public class ByteArrayConverter : JsonConverter
+public class ByteArrayConverter : JsonConverter<byte[]>
 {
-    public override bool CanConvert(Type objectType)
+    public override byte[] Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return objectType == typeof(byte[]);
+        return Convert.FromBase64String(reader.GetString()!);
     }
 
-    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+    public override void Write(Utf8JsonWriter writer, byte[] value, JsonSerializerOptions options)
     {
-        string? encodedData = (string?)reader.Value;
-
-        if (encodedData == null)
-        {
-            return null;
-        }
-        else
-        {
-            return Convert.FromBase64String(encodedData);
-        }
-    }
-
-    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
-    {
-        byte[] data = (byte[])value!;
-
-        writer.WriteValue(Convert.ToBase64String(data));
+        writer.WriteStringValue(Convert.ToBase64String(value));
     }
 }
