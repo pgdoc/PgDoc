@@ -15,35 +15,42 @@
 namespace PgDoc.Serialization.Tests;
 
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-public class InitializeDocumentStoreAttributeTests
+public class InitializeDocumentStoreTests
 {
-    private readonly TestDocumentStore _store = new();
-
     [Fact]
     public async Task InitializeDocumentStore_OnActionExecutionAsync()
     {
-        InitializeDocumentStore initializer = new(_store);
-        await initializer.OnActionExecutionAsync(
-            null,
-            () => Task.FromResult<ActionExecutedContext>(null));
+        TestDocumentStore store = new();
+        bool nextCalled = false;
+        ActionExecutionDelegate next = () =>
+        {
+            nextCalled = true;
+            return Task.FromResult<ActionExecutedContext>(null);
+        };
 
-        Assert.True(_store.Initialized);
+        InitializeDocumentStore initializer = new(store);
+        await initializer.OnActionExecutionAsync(null, next);
+
+        Assert.True(store.Initialized);
+        Assert.True(nextCalled);
     }
 
     [Fact]
     public async Task InitializeDocumentStore_NoDocumentStore()
     {
-        InitializeDocumentStore initializer = new(null);
-        await initializer.OnActionExecutionAsync(
-            null,
-            () => Task.FromResult<ActionExecutedContext>(null));
+        bool nextCalled = false;
+        ActionExecutionDelegate next = () =>
+        {
+            nextCalled = true;
+            return Task.FromResult<ActionExecutedContext>(null);
+        };
 
-        Assert.False(_store.Initialized);
+        InitializeDocumentStore initializer = new(null);
+        await initializer.OnActionExecutionAsync(null, next);
+
+        Assert.True(nextCalled);
     }
 }
