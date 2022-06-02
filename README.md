@@ -14,7 +14,7 @@ PgDoc tries to eliminate altogether the need for object-relational mapping. Inst
 The main benefits of using a RDBMS system such as PostgreSQL are still retained:
 - Ability to use ACID transactions across multiple entities.
 - Ability to use concurrency control to keep the data globally consistent.
-- Ability to query and index complex JSON structures efficiently thanks to [GIN and GiST indexes](https://www.postgresql.org/docs/current/textsearch-indexes.html).
+- Ability to query and index complex JSON structures efficiently thanks to [GIN indexes](https://www.postgresql.org/docs/current/datatype-json.html#JSON-INDEXING).
 - Decades of maturity.
 - Extensive tooling.
 - A permissive open source license.
@@ -45,7 +45,7 @@ builder.Services.AddPgDoc("connection_string");
 
 This will register several services in the dependency injection container including the `EntityStore` class.
 
-In ASP.NET Core applications, it is also recommended to register the  `InitializeDocumentStore` filter globally to ensure the `IDocumentStore` object is automatically initialized. Without this, the `IDocumentStore.Initialize` method must be called explicitely.
+In ASP.NET Core applications, it is also recommended to register the  `InitializeDocumentStore` filter globally to ensure the `IDocumentStore` object is automatically initialized. Without this, the `IDocumentStore.Initialize` method must be called explicitly to open and configure the underlying database connection.
 
 ```csharp
 builder.Services.AddControllers(
@@ -94,10 +94,10 @@ JsonEntity<Product> entity = JsonEntity<Product>.Create(product);
 
 The ID of the entity will be automatically generated. It can be retrieved using `entity.Id`.
 
-The `EntityStore` must then be used to commit the new document to the database. It can be obtained via dependency injection.
+The `EntityStore` class must then be used to commit the new document to the database. It can be obtained via dependency injection.
 
 ```csharp
-// Obtained through dependency injection
+// Obtained via dependency injection
 EntityStore store;
 
 await store.UpdateEntities(entity);
@@ -149,7 +149,7 @@ PgDoc will always make sure no update has been made to the document between the 
 
 The full range of PostgreSQL's JSON operators can be used, along with PostgreSQL's JSON indexing capabilities.
 
-Two objects are required: `ISqlDocumentStore` and `IJsonSerializer`. Both of these are registered when `AddPgDoc` is called.
+Two objects are required: `ISqlDocumentStore` and `IJsonSerializer`. Both of these are automatically registered when `AddPgDoc` is called.
 
 Reusing the `Product` record previously defined, the code below demonstrates how to define a method that will search for a specific value inside the `Categories` array of each document.
 
@@ -175,12 +175,47 @@ public class DocumentQueries
 
         command.Parameters.AddWithValue("@category", category);
 
-        return await _documentStore.ExecuteQuery(command).Select(_serializer.FromDocument<Product>).ToListAsync();
+        return await _documentStore.ExecuteQuery(command)
+            .Select(_serializer.FromDocument<Product>)
+            .ToListAsync();
     }
 }
 ```
 
-This query can be optimized through the use of a [GIN or GiST index](https://www.postgresql.org/docs/current/textsearch-indexes.html).
+This query can be optimized by defining a GIN index:
+
+```sql
+CREATE INDEX idx_categories ON document USING GIN ((body -> 'Categories'));
+```
+
+## Batch updates
+
+There is often a need to atomically update multiple documents simulteanously. This can be achieved using the `BatchBuilder` class.
+
+```csharp
+// Obtained via dependency injection
+EntityStore store;
+
+BatchBuilder batchBuilder = store.CreateBatchBuilder();
+
+Product modifedProduct1 = entity1.Entity with
+{
+    StockQuantity = 20
+};
+
+batchBuilder.Modify(entity1.Modify(modifedProduct1));
+
+Product modifedProduct2 = entity2.Entity with
+{
+    StockQuantity = 30
+};
+
+batchBuilder.Modify(entity2.Modify(modifedProduct2));
+
+await batchBuilder.Submit();
+```
+
+When `batchBuilder.Submit()` is called, both documents will be updated together as part of an ACID transaction. If any of the documents have been modified between the time they were read and the time `batchBuilder.Submit()` is called, an exception of type `UpdateConflictException` will be thrown, and none of the changes will be committed to the database
 
 ## License
 

@@ -14,6 +14,7 @@
 
 namespace PgDoc.Serialization.Tests;
 
+using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Xunit;
@@ -104,14 +105,34 @@ public class ServiceCollectionExtensionsTests
         AssertServices(serviceProvider, "Host=host2");
     }
 
+    [Fact]
+    public void AddPgDoc_ConfigureMultipleTimes()
+    {
+        _serviceCollection.ConfigurePgDoc((_, options) =>
+        {
+            options.ConnectionString += ";Username=admin";
+        });
+
+        _serviceCollection.AddPgDoc("Host=host");
+
+        _serviceCollection.ConfigurePgDoc((_, options) =>
+        {
+            options.ConnectionString += ";Port=5432";
+        });
+
+        ServiceProvider serviceProvider = _serviceCollection.BuildServiceProvider();
+
+        AssertServices(serviceProvider, "Host=host;Username=admin;Port=5432");
+    }
+
     private static void AssertServices(ServiceProvider serviceProvider, string connectionString)
     {
-        NpgsqlConnection connection = serviceProvider.GetService<NpgsqlConnection>();
-        Assert.NotNull(connection);
-        Assert.NotNull(serviceProvider.GetService<EntityStore>());
-        Assert.NotNull(serviceProvider.GetService<ISqlDocumentStore>());
-        Assert.NotNull(serviceProvider.GetService<IDocumentStore>());
-        Assert.NotNull(serviceProvider.GetService<IJsonSerializer>());
-        Assert.Equal(connectionString, connection.ConnectionString);
+        Assert.Single(serviceProvider.GetService<IEnumerable<PgDocOptions>>());
+        Assert.Single(serviceProvider.GetService<IEnumerable<NpgsqlConnection>>());
+        Assert.Single(serviceProvider.GetService<IEnumerable<EntityStore>>());
+        Assert.Single(serviceProvider.GetService<IEnumerable<ISqlDocumentStore>>());
+        Assert.Single(serviceProvider.GetService<IEnumerable<IDocumentStore>>());
+        Assert.Single(serviceProvider.GetService<IEnumerable<IJsonSerializer>>());
+        Assert.Equal(connectionString, serviceProvider.GetService<NpgsqlConnection>().ConnectionString);
     }
 }

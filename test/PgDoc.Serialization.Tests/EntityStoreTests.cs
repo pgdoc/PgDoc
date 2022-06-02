@@ -45,7 +45,7 @@ public class EntityStoreTests
     [Fact]
     public async Task UpdateEntities_Check()
     {
-        await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
+        await _store.UpdateDocuments(new Document(_entityId.Value, "\"Value\"", 0));
 
         await _entityStore.UpdateEntities(
             new IJsonEntity<object>[0],
@@ -80,7 +80,7 @@ public class EntityStoreTests
     [Fact]
     public async Task GetEntity_Found()
     {
-        await _store.UpdateDocuments(new Document(_entityId.Value, "'Value'", 0));
+        await _store.UpdateDocuments(new Document(_entityId.Value, "\"Value\"", 0));
 
         JsonEntity<string> entity = await _entityStore.GetEntity<string>(_entityId);
 

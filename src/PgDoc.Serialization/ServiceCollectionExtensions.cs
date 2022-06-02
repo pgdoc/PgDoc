@@ -19,6 +19,8 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 
+using Configurator = System.Action<System.IServiceProvider, PgDocOptions>;
+
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddPgDoc(this IServiceCollection serviceCollection, string connectionString)
@@ -50,11 +52,10 @@ public static class ServiceCollectionExtensions
         {
             PgDocOptions options = createOptions(services);
 
-            IEnumerable<Action<IServiceProvider, PgDocOptions>> configures =
-                services.GetServices<Action<IServiceProvider, PgDocOptions>>();
+            IEnumerable<Configurator> configurators = services.GetServices<Configurator>();
 
-            foreach (Action<IServiceProvider, PgDocOptions> configure in configures)
-                configure(services, options);
+            foreach (Configurator configurator in configurators)
+                configurator(services, options);
 
             return options;
         });
@@ -78,9 +79,9 @@ public static class ServiceCollectionExtensions
         return serviceCollection;
     }
 
-    public static IServiceCollection ConfigurePgDoc(this IServiceCollection serviceCollection, Action<IServiceProvider, PgDocOptions> configure)
+    public static IServiceCollection ConfigurePgDoc(this IServiceCollection serviceCollection, Configurator configurator)
     {
-        serviceCollection.AddSingleton<Action<IServiceProvider, PgDocOptions>>(configure);
+        serviceCollection.AddSingleton<Configurator>(configurator);
         return serviceCollection;
     }
 }
