@@ -22,7 +22,7 @@ The main benefits of using a RDBMS system such as PostgreSQL are still retained:
 
 ## Setup
 
-Run the [`PgDoc/pgdoc.sql` SQL script](https://raw.githubusercontent.com/pgdoc/PgDoc/master/src/PgDoc/sql/pgdoc.sql) to create the required table and functions in the database.
+Run the [PgDoc.Core.sql script](https://raw.githubusercontent.com/pgdoc/PgDoc.Core/master/src/PgDoc.Core/Sql/PgDoc.Core.sql) to create the required table and functions in the database.
 
 ## Concepts
 
