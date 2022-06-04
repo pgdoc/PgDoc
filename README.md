@@ -1,7 +1,7 @@
-# PgDoc.Serialization
-[![PgDoc.Serialization](https://img.shields.io/nuget/v/PgDoc.Serialization.svg?style=flat-square&color=blue&logo=nuget)](https://www.nuget.org/packages/PgDoc.Serialization/)
+# PgDoc
+[![PgDoc](https://img.shields.io/nuget/v/PgDoc.svg?style=flat-square&color=blue&logo=nuget)](https://www.nuget.org/packages/PgDoc/)
 
-PgDoc is a library for using PostgreSQL as a JSON document store. PgDoc.Serialization manages the mapping between .NET objects and JSON documents.
+PgDoc is a library for using PostgreSQL as a JSON document store. It manages the mapping between .NET objects and JSON documents.
 
 ## Philosophy
 
