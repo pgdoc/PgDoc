@@ -22,12 +22,12 @@ The main benefits of using a RDBMS system such as PostgreSQL are still retained:
 
 ## Setup
 
-Run the [SQL script in `src/PgDoc/SQL/pgdoc.sql` in the PgDoc repository](https://raw.githubusercontent.com/pgdoc/PgDoc/master/src/PgDoc/SQL/pgdoc.sql) to create the required table and functions in the database.
+Run the [`PgDoc/pgdoc.sql` SQL script](https://raw.githubusercontent.com/pgdoc/PgDoc/master/src/PgDoc/sql/pgdoc.sql) to create the required table and functions in the database.
 
 ## Concepts
 
 PgDoc uses a single `document` table with just three columns:
-- `id` (of type `Guid`) is used as the primary key of the table.
+- `id` (of type `uuid`) is used as the primary key of the table.
 - `body` contains the JSON document itself.
 - Finally, `version` is used for optimistic concurrency control. It is normally not directly manipulated by the users of PgDoc, but it is used behind the scenes to guarantee safety when using the read-modify-write pattern.
 
@@ -73,7 +73,7 @@ public record Product
 }
 ```
 
-Since PgDoc uses a single table to store all documents, which could be of heterogeneous types, the `[JsonEntityType]` attribute is used to help differenciate between the differnet types. The value specified through the attribute is stored as the first four bytes of the ID of the document. By simply looking at the first four bytes of the ID, it is therefore possible to tell which schema the document has.
+Since PgDoc uses a single table to store all documents, which could be of heterogeneous types, the `[JsonEntityType]` attribute is used to help differenciate between the different types. The value specified through the attribute is stored as the first four bytes of the ID of the document. By simply looking at the first four bytes of the ID, it is therefore possible to tell which schema the document has.
 
 ## Creating a new document
 
