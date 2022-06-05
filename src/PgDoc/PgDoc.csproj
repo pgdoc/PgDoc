@@ -3,7 +3,7 @@
   <PropertyGroup>
     <VersionPrefix>3.0.0</VersionPrefix>
     <Title>PgDoc</Title>
-    <Description>PgDoc is a library for serializing .NET objects to JSON and store them into a PostgreSQL document store.</Description>
+    <Description>PgDoc is a library for using PostgreSQL as a JSON document store.</Description>
     <Authors>Flavien Charlon</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/pgdoc</PackageProjectUrl>

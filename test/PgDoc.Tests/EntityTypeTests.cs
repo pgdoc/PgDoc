@@ -68,6 +68,14 @@ public class EntityTypeTests
     }
 
     [Fact]
+    public void ToString_Success()
+    {
+        EntityType entityType = new(15);
+
+        Assert.Equal("15", entityType.ToString());
+    }
+
+    [Fact]
     public void Equality_Success()
     {
         Assert.True(new EntityType(1) == new EntityType(1));

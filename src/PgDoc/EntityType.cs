@@ -70,6 +70,11 @@ public readonly struct EntityType : IEquatable<EntityType>
         return Value.GetHashCode();
     }
 
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
+
     public static bool operator ==(EntityType left, EntityType right)
     {
         return left.Value == right.Value;

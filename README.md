@@ -22,7 +22,9 @@ The main benefits of using a RDBMS system such as PostgreSQL are still retained:
 
 ## Setup
 
-Run the [PgDoc.Core.sql script](https://raw.githubusercontent.com/pgdoc/PgDoc.Core/master/src/PgDoc.Core/Sql/PgDoc.Core.sql) to create the required table and functions in the database.
+Before using PgDoc, the database schema must be created:
+- Run the [PgDoc.Core.sql script](https://raw.githubusercontent.com/pgdoc/PgDoc.Core/master/src/PgDoc.Core/Sql/PgDoc.Core.sql).
+- Run the [PgDoc.sql script](https://raw.githubusercontent.com/pgdoc/PgDoc/master/src/PgDoc/Sql/PgDoc.sql).
 
 ## Concepts
 
@@ -73,7 +75,9 @@ public record Product
 }
 ```
 
-Since PgDoc uses a single table to store all documents, which could be of heterogeneous types, the `[JsonEntityType]` attribute is used to help differenciate between the different types. The value specified through the attribute is stored as the first four bytes of the ID of the document. By simply looking at the first four bytes of the ID, it is therefore possible to tell which schema the document has.
+Since PgDoc uses a single table to store all documents, which could be of heterogeneous types, the `[JsonEntityType]` attribute is used to help differenciate between the different types. The value specified through the attribute is stored as the first four bytes of the ID of the document.
+
+The `document_of_type(int)` function will return all documents of the specified type, filtering out all the other documents.
 
 ## Creating a new document
 
@@ -169,7 +173,7 @@ public class DocumentQueries
     {
         using NpgsqlCommand command = new NpgsqlCommand($@"
             SELECT id, body, version
-            FROM document
+            FROM document_of_type({EntityType.GetEntityType<Product>()})
             WHERE (body -> 'Categories') ? @category
         ");
 
@@ -185,8 +189,12 @@ public class DocumentQueries
 This query can be optimized by defining a GIN index:
 
 ```sql
-CREATE INDEX idx_categories ON document USING GIN ((body -> 'Categories'));
+CREATE INDEX idx_categories ON document
+USING GIN ((body -> 'Categories'))
+WHERE ((body IS NOT NULL) AND (get_document_type(id) = 1));
 ```
+
+The filtering clause (`(body IS NOT NULL) AND (get_document_type(id) = 1)`) ensures that the index only covers the documents of the correct type. The value `1` corresponds to the value specified in the `[JsonEntityType(1)]` attribute.
 
 ## Batch updates
 
