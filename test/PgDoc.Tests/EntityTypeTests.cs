@@ -30,9 +30,11 @@ public class EntityTypeTests
     [Fact]
     public void GetEntityType_Success()
     {
-        EntityType entityType = EntityType.GetEntityType<TestEntity>();
+        EntityType cacheMiss = EntityType.GetEntityType<TestEntity>();
+        EntityType cacheHit = EntityType.GetEntityType<TestEntity>();
 
-        Assert.Equal(4, entityType.Value);
+        Assert.Equal(4, cacheMiss.Value);
+        Assert.Equal(4, cacheHit.Value);
     }
 
     [Fact]

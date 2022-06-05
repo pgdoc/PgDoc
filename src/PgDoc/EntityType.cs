@@ -15,6 +15,7 @@
 namespace PgDoc;
 
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 
 /// <summary>
@@ -22,6 +23,8 @@ using System.Linq;
 /// </summary>
 public readonly struct EntityType : IEquatable<EntityType>
 {
+    private static readonly ConcurrentDictionary<Type, EntityType> _entityTypeCache = new();
+
     public EntityType(int value)
     {
         Value = value;
@@ -31,14 +34,25 @@ public readonly struct EntityType : IEquatable<EntityType>
 
     public static EntityType GetEntityType<T>()
     {
-        object[] customAttributes = typeof(T).GetCustomAttributes(typeof(JsonEntityTypeAttribute), true);
+        if (!_entityTypeCache.TryGetValue(typeof(T), out EntityType result))
+        {
+            object[] customAttributes = typeof(T).GetCustomAttributes(typeof(JsonEntityTypeAttribute), true);
 
-        JsonEntityTypeAttribute attribute = customAttributes.OfType<JsonEntityTypeAttribute>().FirstOrDefault();
+            JsonEntityTypeAttribute attribute = customAttributes.OfType<JsonEntityTypeAttribute>().FirstOrDefault();
 
-        if (attribute == null)
-            throw new ArgumentException($"The type {typeof(T).Name} does not have a JsonEntityType attribute.", nameof(T));
+            if (attribute == null)
+            {
+                throw new ArgumentException(
+                    $"The type {typeof(T).Name} does not have a JsonEntityType attribute.",
+                    nameof(T));
+            }
 
-        return new EntityType(attribute.EntityType);
+            result = new EntityType(attribute.EntityType);
+
+            _entityTypeCache.TryAdd(typeof(T), result);
+        }
+
+        return result;
     }
 
     public bool Equals(EntityType other)
