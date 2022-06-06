@@ -28,11 +28,11 @@ public class InitializeDocumentStoreTests
         ActionExecutionDelegate next = () =>
         {
             nextCalled = true;
-            return Task.FromResult<ActionExecutedContext>(null);
+            return Task.FromResult<ActionExecutedContext>(null!);
         };
 
         InitializeDocumentStore initializer = new(store);
-        await initializer.OnActionExecutionAsync(null, next);
+        await initializer.OnActionExecutionAsync(null!, next);
 
         Assert.True(store.Initialized);
         Assert.True(nextCalled);
@@ -45,11 +45,11 @@ public class InitializeDocumentStoreTests
         ActionExecutionDelegate next = () =>
         {
             nextCalled = true;
-            return Task.FromResult<ActionExecutedContext>(null);
+            return Task.FromResult<ActionExecutedContext>(null!);
         };
 
-        InitializeDocumentStore initializer = new(null);
-        await initializer.OnActionExecutionAsync(null, next);
+        InitializeDocumentStore initializer = new(null!);
+        await initializer.OnActionExecutionAsync(null!, next);
 
         Assert.True(nextCalled);
     }

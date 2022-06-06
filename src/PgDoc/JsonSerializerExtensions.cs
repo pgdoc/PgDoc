@@ -14,6 +14,7 @@
 
 namespace PgDoc;
 
+using System;
 using PgDoc.Core;
 
 public static class JsonSerializerExtensions
@@ -22,8 +23,7 @@ public static class JsonSerializerExtensions
     /// Converts a <see cref="IJsonEntity{T}"/> object to a <see cref="Document"/> object by serializing its body
     /// to JSON.
     /// </summary>
-    public static Document ToDocument<T>(this IJsonSerializer serializer, IJsonEntity<T> jsonEntity)
-        where T : class
+    public static Document ToDocument<T>(this IJsonSerializer serializer, IJsonEntity<T?> jsonEntity)
     {
         return new Document(
             id: jsonEntity.Id.Value,
@@ -34,16 +34,35 @@ public static class JsonSerializerExtensions
     }
 
     /// <summary>
-    /// Converts a <see cref="Document"/> object to a <see cref="JsonEntity{T}"/> by deserializing its JSON body.
+    /// Converts a <see cref="Document"/> object to a <see cref="IJsonEntity{T}"/> by deserializing its JSON body.
     /// </summary>
-    public static JsonEntity<T> FromDocument<T>(this IJsonSerializer serializer, Document document)
-        where T : class
+    public static IJsonEntity<T?> FromDocument<T>(this IJsonSerializer serializer, Document document)
+        where T : class?
     {
-        return new JsonEntity<T>(
+        return new JsonEntity<T?>(
             id: new EntityId(document.Id),
             entity: document.Body != null
                 ? serializer.Deserialize<T>(document.Body)
                 : null,
             version: document.Version);
+    }
+
+    /// <summary>
+    /// Converts a <see cref="Document"/> object to a <see cref="IJsonEntity{T}"/> by deserializing its JSON body.
+    /// The document must have a non-null body, or an <see cref="ArgumentException"/> will be thrown.
+    /// </summary>
+    public static IJsonEntity<T> FromExistingDocument<T>(this IJsonSerializer serializer, Document document)
+    {
+        if (document.Body != null)
+        {
+            return new JsonEntity<T>(
+                id: new EntityId(document.Id),
+                entity: serializer.Deserialize<T>(document.Body),
+                version: document.Version);
+        }
+        else
+        {
+            throw new ArgumentException("The body of the document must not be null.", nameof(document));
+        }
     }
 }

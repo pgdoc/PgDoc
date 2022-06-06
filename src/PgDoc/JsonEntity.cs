@@ -15,66 +15,24 @@
 namespace PgDoc;
 
 /// <summary>
-///  Represents a document composed of a unique ID, a deserialized JSON body and a version number.
+/// Represents a document composed of a unique ID, a deserialized JSON body and a version number.
 /// </summary>
 /// <typeparam name="T">The type used to deserialize the JSON body of the document.</typeparam>
 public class JsonEntity<T> : IJsonEntity<T>
-    where T : class
 {
-    public JsonEntity(EntityId id, T? entity, long version)
+    public JsonEntity(EntityId id, T entity, long version)
     {
         Id = id;
         Entity = entity;
         Version = version;
     }
 
-    /// <summary>
-    /// Gets the unique identifier of the document.
-    /// </summary>
+    /// <inheritdoc/>
     public EntityId Id { get; }
 
-    /// <summary>
-    /// Gets the body of the document deserialized into an object, or null if the document does not exist.
-    /// </summary>
-    public T? Entity { get; }
+    /// <inheritdoc/>
+    public T Entity { get; }
 
-    /// /// <summary>
-    /// Gets the current version of the document.
-    /// </summary>
+    /// <inheritdoc/>
     public long Version { get; }
-
-    /// <summary>
-    /// Returns a copy of this <see cref="JsonEntity{T}"/> object with the same ID and version, but replaces the
-    /// body with a new one.
-    /// </summary>
-    public JsonEntity<T> Modify(T newValue)
-    {
-        return new JsonEntity<T>(Id, newValue, Version);
-    }
-
-    /// <summary>
-    /// Creates a new <see cref="JsonEntity{T}"/> object with a new random ID and a version set to zero.
-    /// </summary>
-    public static JsonEntity<T> Create(T value, EntityType type)
-    {
-        return new JsonEntity<T>(EntityId.New(type), value, 0);
-    }
-
-    /// <summary>
-    /// Creates a new <see cref="JsonEntity{T}"/> object with a new random ID and a version set to zero.
-    /// </summary>
-    public static JsonEntity<T> Create(T value)
-    {
-        return Create(value, EntityType.GetEntityType<T>());
-    }
-
-    /// <summary>
-    /// Deconstructs the ID, body and version of this <see cref="JsonEntity{T}"/> object.
-    /// </summary>
-    public void Deconstruct(out EntityId id, out T? entity, out long version)
-    {
-        id = Id;
-        entity = Entity;
-        version = Version;
-    }
 }

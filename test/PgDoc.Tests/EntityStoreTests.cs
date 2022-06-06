@@ -36,7 +36,7 @@ public class EntityStoreTests
     {
         await _entityStore.UpdateEntities(new JsonEntity<string>(_entityId, "Value", 0));
 
-        JsonEntity<string> entity = await _entityStore.GetEntity<string>(_entityId);
+        IJsonEntity<string?> entity = await _entityStore.GetEntity<string>(_entityId);
 
         Assert.Equal(_entityId, entity.Id);
         Assert.Equal("Value", entity.Entity);
@@ -50,9 +50,9 @@ public class EntityStoreTests
 
         await _entityStore.UpdateEntities(
             new IJsonEntity<object>[0],
-            new[] { new JsonEntity<string>(_entityId, null, 1) });
+            new[] { new JsonEntity<string?>(_entityId, null, 1) });
 
-        JsonEntity<string> entity = await _entityStore.GetEntity<string>(_entityId);
+        IJsonEntity<string?> entity = await _entityStore.GetEntity<string>(_entityId);
 
         Assert.Equal(_entityId, entity.Id);
         Assert.Equal("Value", entity.Entity);
@@ -62,13 +62,13 @@ public class EntityStoreTests
     [Fact]
     public async Task UpdateEntities_Multiple()
     {
-        JsonEntity<string> entity1 = JsonEntity<string>.Create("Value", new EntityType(1));
-        JsonEntity<int[]> entity2 = JsonEntity<int[]>.Create(new[] { 1, 2, 3 }, new EntityType(2));
+        IJsonEntity<string> entity1 = JsonEntity.Create("Value", new EntityType(1));
+        IJsonEntity<int[]> entity2 = JsonEntity.Create(new[] { 1, 2, 3 }, new EntityType(2));
 
         await _entityStore.UpdateEntities(entity1, entity2);
 
-        JsonEntity<string> result1 = await _entityStore.GetEntity<string>(entity1.Id);
-        JsonEntity<int[]> result2 = await _entityStore.GetEntity<int[]>(entity2.Id);
+        IJsonEntity<string?> result1 = await _entityStore.GetEntity<string>(entity1.Id);
+        IJsonEntity<int[]?> result2 = await _entityStore.GetEntity<int[]>(entity2.Id);
 
         Assert.Equal(entity1.Id, result1.Id);
         Assert.Equal("Value", result1.Entity);
@@ -83,7 +83,7 @@ public class EntityStoreTests
     {
         await _store.UpdateDocuments(new Document(_entityId.Value, "\"Value\"", 0));
 
-        JsonEntity<string> entity = await _entityStore.GetEntity<string>(_entityId);
+        IJsonEntity<string?> entity = await _entityStore.GetEntity<string>(_entityId);
 
         Assert.Equal(_entityId, entity.Id);
         Assert.Equal("Value", entity.Entity);
@@ -93,7 +93,7 @@ public class EntityStoreTests
     [Fact]
     public async Task GetEntity_NotFound()
     {
-        JsonEntity<string> entity = await _entityStore.GetEntity<string>(_entityId);
+        IJsonEntity<string?> entity = await _entityStore.GetEntity<string>(_entityId);
 
         Assert.Equal(_entityId, entity.Id);
         Assert.Null(entity.Entity);
@@ -112,13 +112,13 @@ public class EntityStoreTests
     public void Constructor_NullSerializer()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new EntityStore(_store, null));
+            () => new EntityStore(_store, null!));
     }
 
     [Fact]
     public void Constructor_NullStore()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new EntityStore(null, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultOptions())));
+            () => new EntityStore(null!, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultOptions())));
     }
 }

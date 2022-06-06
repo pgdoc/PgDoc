@@ -28,10 +28,38 @@ Before using PgDoc, the database schema must be created:
 
 ## Concepts
 
+### Table schema
+
 PgDoc uses a single `document` table with just three columns:
 - `id` (of type `uuid`) is used as the primary key of the table.
 - `body` contains the JSON document itself.
-- Finally, `version` is used for optimistic concurrency control. It is normally not directly manipulated by the users of PgDoc, but it is used behind the scenes to guarantee safety when using the read-modify-write pattern.
+- `version` is used for optimistic concurrency control. It is normally not directly manipulated by the users of PgDoc, but it is used behind the scenes to guarantee safety when using the read-modify-write pattern.
+
+### The `IJsonEntity<T>` type
+
+In the application code, documents are represented using the `IJsonEntity<T>` type:
+
+```csharp
+public interface IJsonEntity<out T>
+{
+    /// <summary>
+    /// Gets the unique identifier of the document.
+    /// </summary>
+    public EntityId Id { get; }
+
+    /// <summary>
+    /// Gets the body of the document deserialized into an object, or null if the document does not exist.
+    /// </summary>
+    public T Entity { get; }
+
+    /// /// <summary>
+    /// Gets the current version of the document.
+    /// </summary>
+    public long Version { get; }
+}
+```
+
+The `Entity` property can be null if the document does not exists. This can be the case for a document that hasn't been created yet, or for a document that has been deleted.
 
 ## Configuration
 
@@ -75,13 +103,13 @@ public record Product
 }
 ```
 
-Since PgDoc uses a single table to store all documents, which could be of heterogeneous types, the `[JsonEntityType]` attribute is used to help differenciate between the different types. The value specified through the attribute is stored as the first four bytes of the ID of the document.
+Since PgDoc uses a single table to store all documents, which could be of different types, the `[JsonEntityType]` attribute is used to help differenciate them. The value specified through the attribute is stored as the first 32 bits of the ID of the document.
 
 The `document_of_type(int)` function will return all documents of the specified type, filtering out all the other documents.
 
 ## Creating a new document
 
-In order to create a new document, the `JsonEntity<T>.Create` method is used.
+In order to create a new document, the `JsonEntity.Create` method is used.
 
 ```csharp
 Product product = new Product()
@@ -93,7 +121,7 @@ Product product = new Product()
     Categories = new List<string>() { "Frozen Foods", "Organic" }
 };
 
-JsonEntity<Product> entity = JsonEntity<Product>.Create(product);
+IJsonEntity<Product> entity = JsonEntity.Create(product);
 ```
 
 The ID of the entity will be automatically generated. It can be retrieved using `entity.Id`.
@@ -122,19 +150,26 @@ This will serialize the object and store it in the database:
 }
 ```
 
+## Retrieving a document by ID
+
+The simplest way to retrieve a document is by using its ID, with the `GetEntity<T>` method.
+
+```csharp
+// The ID of the document is already known
+EntityId id;
+
+IJsonEntity<Product?> entity = await store.GetEntity<Product>(id);
+```
+
+If the document does not exist, this method will return a "shadow" `IJsonEntity<T>` object which has a null body and a version number of `0`. It is possible to update this "shadow" document the same way a normal document can be updated, which will result in the document being effectively created in the database.
+
 ## Modifying a document
 
 PgDoc relies on the read-modify-write pattern, with mandatory optimistic concurrency control to ensure safe writes.
 
-The document should first be retrieved from the database. One way to retrieve the document is by using its ID.
+The entity to modify should first be read from the database, either by using its ID as seen above, or using custom SQL queries as seen in the next section.
 
-```csharp
-EntityId id;
-
-JsonEntity<Product> entity = await store.GetEntity<Product>(id);
-```
-
-The entity can then be modified by calling `entity.Modify`. This returns a new copy of the original entity with the same ID and version, but a modified body. The new entity is then used with `EntityStore.UpdateEntities` to commit the update.
+Once the entity has been retrieved, it can then be modified by calling the `Modify` method. This method returns a new copy of the original entity with the same ID and version, but a modified body. The new entity is then used with `EntityStore.UpdateEntities` to commit the update.
 
 ```csharp
 Product modifiedProduct = entity.Entity with
@@ -142,7 +177,7 @@ Product modifiedProduct = entity.Entity with
     Price = 4.95m
 };
 
-JsonEntity<Product> modifiedEntity = entity.Modify(modifiedProduct);
+IJsonEntity<Product?> modifiedEntity = entity.Modify(modifiedProduct);
 
 await store.UpdateEntities(modifiedEntity);
 ```
@@ -169,7 +204,7 @@ public class DocumentQueries
         _serializer = serializer;
     }
 
-    public async Task<IList<JsonEntity<Product>>> FindByCategory(string category)
+    public async Task<IList<IJsonEntity<Product>>> FindByCategory(string category)
     {
         using NpgsqlCommand command = new NpgsqlCommand($@"
             SELECT id, body, version
@@ -180,7 +215,7 @@ public class DocumentQueries
         command.Parameters.AddWithValue("@category", category);
 
         return await _documentStore.ExecuteQuery(command)
-            .Select(_serializer.FromDocument<Product>)
+            .Select(_serializer.FromExistingDocument<Product>)
             .ToListAsync();
     }
 }
@@ -223,7 +258,7 @@ batchBuilder.Modify(entity2.Modify(modifedProduct2));
 await batchBuilder.Submit();
 ```
 
-When `batchBuilder.Submit()` is called, both documents will be updated together as part of an ACID transaction. If any of the documents have been modified between the time they were read and the time `batchBuilder.Submit()` is called, an exception of type `UpdateConflictException` will be thrown, and none of the changes will be committed to the database
+When `batchBuilder.Submit()` is called, both documents will be updated together as part of an ACID transaction. If any of the documents have been modified between the time they were read and the time `batchBuilder.Submit()` is called, an exception of type `UpdateConflictException` will be thrown, and none of the changes will be committed to the database.
 
 ## License
 

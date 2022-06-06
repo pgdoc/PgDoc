@@ -24,12 +24,9 @@ public class JsonEntityTests
     [Fact]
     public void Create_ExplicitType()
     {
-        TestObject testObject = new()
-        {
-            Int64Value = 100
-        };
+        TestObject testObject = TestObject.Create(100);
 
-        JsonEntity<TestObject> result = JsonEntity<TestObject>.Create(testObject, new EntityType(1));
+        IJsonEntity<TestObject> result = JsonEntity.Create(testObject, new EntityType(1));
 
         Assert.Equal(1, result.Id.Type.Value);
         Assert.Equal(testObject, result.Entity);
@@ -39,12 +36,9 @@ public class JsonEntityTests
     [Fact]
     public void Create_UseAttribute()
     {
-        TestObject testObject = new()
-        {
-            Int64Value = 100
-        };
+        TestObject testObject = TestObject.Create(100);
 
-        JsonEntity<TestObject> result = JsonEntity<TestObject>.Create(testObject);
+        IJsonEntity<TestObject> result = JsonEntity.Create(testObject);
 
         Assert.Equal(5, result.Id.Type.Value);
         Assert.Equal(testObject, result.Entity);
@@ -54,46 +48,42 @@ public class JsonEntityTests
     [Fact]
     public void Modify_Success()
     {
-        TestObject initialObject = new()
-        {
-            Int64Value = 100
-        };
+        TestObject initialObject = TestObject.Create(100);
+        TestObject newObject = TestObject.Create(200);
 
-        TestObject newObject = new()
-        {
-            Int64Value = 200
-        };
-
-        JsonEntity<TestObject> initialValue = new(new EntityId(_guid), initialObject, 10);
-        JsonEntity<TestObject> result = initialValue.Modify(newObject);
+        IJsonEntity<TestObject> initialValue = new JsonEntity<TestObject>(new EntityId(_guid), initialObject, 10);
+        IJsonEntity<TestObject> result = initialValue.Modify(newObject);
 
         Assert.Equal(new EntityId(_guid), result.Id);
-        Assert.Equal(200, result.Entity.Int64Value);
+        Assert.Equal(200, result.Entity.Value);
         Assert.Equal(10, result.Version);
     }
 
     [Fact]
     public void Deconstruct_Success()
     {
-        TestObject testObject = new()
-        {
-            StringValue = "abcd"
-        };
+        TestObject testObject = TestObject.Create(100);
 
-        JsonEntity<TestObject> jsonEntity = new(new EntityId(_guid), testObject, 10);
+        IJsonEntity<TestObject> jsonEntity = new JsonEntity<TestObject>(new EntityId(_guid), testObject, 10);
 
         (EntityId id, TestObject entity, long version) = jsonEntity;
 
         Assert.Equal(new EntityId(_guid), id);
-        Assert.Equal("abcd", entity.StringValue);
+        Assert.Equal(100, entity.Value);
         Assert.Equal(10, version);
     }
 
     [JsonEntityType(5)]
     public class TestObject
     {
-        public string StringValue { get; set; }
+        public long Value { get; set; }
 
-        public long Int64Value { get; set; }
+        public static TestObject Create(long value)
+        {
+            return new TestObject()
+            {
+                Value = value
+            };
+        }
     }
 }

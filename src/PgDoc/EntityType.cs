@@ -60,7 +60,7 @@ public readonly struct EntityType : IEquatable<EntityType>
         return Value == other.Value;
     }
 
-    public override bool Equals(object other)
+    public override bool Equals(object? other)
     {
         return (other is EntityType otherEntityType) && Equals(otherEntityType);
     }

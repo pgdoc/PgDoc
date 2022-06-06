@@ -14,6 +14,7 @@
 
 namespace PgDoc;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -27,6 +28,7 @@ public class DefaultJsonSerializer : IJsonSerializer
     }
 
     /// <inheritdoc />
+    [return: NotNull]
     public T Deserialize<T>(string json)
     {
         using JsonDocument jsonDocument = JsonDocument.Parse(json);
@@ -40,7 +42,7 @@ public class DefaultJsonSerializer : IJsonSerializer
     }
 
     /// <inheritdoc />
-    public string Serialize<T>(T value)
+    public string Serialize<T>([DisallowNull] T value)
     {
         return JsonSerializer.Serialize<T>(value, _jsonSerializerOptions);
     }

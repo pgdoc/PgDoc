@@ -14,15 +14,18 @@
 
 namespace PgDoc;
 
+using System.Diagnostics.CodeAnalysis;
+
 public interface IJsonSerializer
 {
     /// <summary>
     /// Deserializes a JSON string to the specified type.
     /// </summary>
+    [return: NotNull]
     T Deserialize<T>(string json);
 
     /// <summary>
     /// Serializes the specified object to a JSON string.
     /// </summary>
-    string Serialize<T>(T value);
+    string Serialize<T>([DisallowNull] T value);
 }

@@ -154,14 +154,14 @@ public class BatchBuilderTests
     public void Constructor_NullSerializer()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new BatchBuilder(_store, null));
+            () => new BatchBuilder(_store, null!));
     }
 
     [Fact]
     public void Constructor_NullStore()
     {
         Assert.Throws<ArgumentNullException>(
-            () => new BatchBuilder(null, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultOptions())));
+            () => new BatchBuilder(null!, new DefaultJsonSerializer(DefaultJsonSerializer.GetDefaultOptions())));
     }
 
     private void Modify(EntityId entityId, long version)

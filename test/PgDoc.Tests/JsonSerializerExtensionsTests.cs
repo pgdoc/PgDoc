@@ -38,10 +38,10 @@ public class JsonSerializerExtensionsTests
             StringValue = "value"
         };
 
-        JsonEntity<TestObject> entity = new(new EntityId(_guid), testObject, 10);
+        IJsonEntity<TestObject> entity = new JsonEntity<TestObject>(new EntityId(_guid), testObject, 10);
 
         Document document = _serializer.ToDocument(entity);
-        JsonEntity<TestObject> result = _serializer.FromDocument<TestObject>(document);
+        IJsonEntity<TestObject?> result = _serializer.FromDocument<TestObject>(document);
 
         const string expectedJson = """
             {
@@ -55,16 +55,16 @@ public class JsonSerializerExtensionsTests
 
         Assert.Equal(_guid, result.Id.Value);
         Assert.Equal(10, result.Version);
-        Assert.Equal("value", result.Entity.StringValue);
+        Assert.Equal("value", result.Entity?.StringValue);
     }
 
     [Fact]
     public void FromDocument_NullBody()
     {
-        JsonEntity<TestObject> entity = new(new EntityId(_guid), null, 10);
+        IJsonEntity<TestObject?> entity = new JsonEntity<TestObject?>(new EntityId(_guid), null, 10);
 
         Document document = _serializer.ToDocument(entity);
-        JsonEntity<TestObject> result = _serializer.FromDocument<TestObject>(document);
+        IJsonEntity<TestObject?> result = _serializer.FromDocument<TestObject>(document);
 
         Assert.Equal(_guid, document.Id);
         Assert.Equal(10, document.Version);
@@ -75,9 +75,35 @@ public class JsonSerializerExtensionsTests
         Assert.Null(result.Entity);
     }
 
+    [Fact]
+    public void FromExistingDocument_NonNullBody()
+    {
+        const string json = """
+            {
+                "StringValue": "value"
+            }
+        """;
+
+        Document document = new(_guid, json, 10);
+        IJsonEntity<TestObject> result = _serializer.FromExistingDocument<TestObject>(document);
+
+        Assert.Equal(_guid, result.Id.Value);
+        Assert.Equal(10, result.Version);
+        Assert.Equal("value", result.Entity.StringValue);
+    }
+
+    [Fact]
+    public void FromExistingDocument_NullBody()
+    {
+        Document document = new(_guid, null, 10);
+
+        Assert.Throws<ArgumentException>(() =>
+            _serializer.FromExistingDocument<TestObject>(document));
+    }
+
     [JsonEntityType(5)]
     public class TestObject
     {
-        public string StringValue { get; set; }
+        public string? StringValue { get; set; }
     }
 }

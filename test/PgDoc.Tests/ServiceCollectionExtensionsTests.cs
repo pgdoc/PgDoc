@@ -134,6 +134,6 @@ public class ServiceCollectionExtensionsTests
         Assert.Single(serviceProvider.GetService<IEnumerable<ISqlDocumentStore>>());
         Assert.Single(serviceProvider.GetService<IEnumerable<IDocumentStore>>());
         Assert.Single(serviceProvider.GetService<IEnumerable<IJsonSerializer>>());
-        Assert.Equal(connectionString, serviceProvider.GetService<NpgsqlConnection>().ConnectionString);
+        Assert.Equal(connectionString, serviceProvider.GetService<NpgsqlConnection>()?.ConnectionString);
     }
 }

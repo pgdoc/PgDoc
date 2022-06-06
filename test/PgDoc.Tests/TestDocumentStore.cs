@@ -22,7 +22,7 @@ using PgDoc.Core;
 
 public class TestDocumentStore : IDocumentStore
 {
-    public IDictionary<Guid, Tuple<string, long>> Store { get; } = new Dictionary<Guid, Tuple<string, long>>();
+    public IDictionary<Guid, Tuple<string?, long>> Store { get; } = new Dictionary<Guid, Tuple<string?, long>>();
 
     public bool Initialized { get; private set; } = false;
 
@@ -36,7 +36,7 @@ public class TestDocumentStore : IDocumentStore
     {
         return Task.FromResult((IReadOnlyList<Document>)ids.Select(id =>
         {
-            if (Store.TryGetValue(id, out Tuple<string, long> value))
+            if (Store.TryGetValue(id, out Tuple<string?, long>? value))
                 return new Document(id, value.Item1, value.Item2);
             else
                 return new Document(id, null, 0);

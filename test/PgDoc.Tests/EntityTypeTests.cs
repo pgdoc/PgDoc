@@ -93,6 +93,6 @@ public class EntityTypeTests
     [JsonEntityType(4)]
     private class TestEntity
     {
-        public string StringValue { get; set; }
+        public string? StringValue { get; set; }
     }
 }

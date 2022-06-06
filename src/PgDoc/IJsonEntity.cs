@@ -19,7 +19,6 @@ namespace PgDoc;
 /// </summary>
 /// <typeparam name="T">The type used to deserialize the JSON body of the document.</typeparam>
 public interface IJsonEntity<out T>
-    where T : class
 {
     /// <summary>
     /// Gets the unique identifier of the document.
@@ -29,7 +28,7 @@ public interface IJsonEntity<out T>
     /// <summary>
     /// Gets the body of the document deserialized into an object, or null if the document does not exist.
     /// </summary>
-    public T? Entity { get; }
+    public T Entity { get; }
 
     /// /// <summary>
     /// Gets the current version of the document.

@@ -37,8 +37,8 @@ public class EntityStore
     /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
     /// base version.</exception>
     public async Task UpdateEntities(
-        IEnumerable<IJsonEntity<object>> updatedDocuments,
-        IEnumerable<IJsonEntity<object>> checkedDocuments)
+        IEnumerable<IJsonEntity<object?>> updatedDocuments,
+        IEnumerable<IJsonEntity<object?>> checkedDocuments)
     {
         await _documentStore.UpdateDocuments(
             updatedDocuments.Select(_jsonSerializer.ToDocument),
@@ -50,15 +50,15 @@ public class EntityStore
     /// </summary>
     /// <exception cref="UpdateConflictException">Thrown when attempting to modify a document using the wrong
     /// base version.</exception>
-    public async Task UpdateEntities(params IJsonEntity<object>[] updatedDocuments)
+    public async Task UpdateEntities(params IJsonEntity<object?>[] updatedDocuments)
     {
-        await UpdateEntities(updatedDocuments, Array.Empty<IJsonEntity<object>>());
+        await UpdateEntities(updatedDocuments, Array.Empty<IJsonEntity<object?>>());
     }
 
     /// <summary>
-    /// Retrieves a document given its ID, represented as a <see cref="JsonEntity{T}"/> object.
+    /// Retrieves a document given its ID, represented as a <see cref="IJsonEntity{T}"/> object.
     /// </summary>
-    public async Task<JsonEntity<T>> GetEntity<T>(EntityId id)
+    public async Task<IJsonEntity<T?>> GetEntity<T>(EntityId id)
         where T : class
     {
         Document result = await _documentStore.GetDocument(id.Value);

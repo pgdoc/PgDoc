@@ -178,22 +178,22 @@ public class DefaultJsonSerializerTests
     [JsonEntityType(5)]
     public record TestObject
     {
-        public string StringValue { get; set; }
+        public string? StringValue { get; set; }
 
         public long Int64Value { get; set; }
 
         public decimal DecimalValue { get; set; }
 
-        public byte[] ByteValue { get; set; }
+        public byte[]? ByteValue { get; set; }
 
         public DateTime? NullableDateValue { get; set; }
 
         public DateTime DateValue { get; set; }
 
-        public EntityId EntityIdValue { get; set; }
+        public EntityId? EntityIdValue { get; set; }
 
         public DateTimeKind EnumValue { get; set; }
 
-        public ImmutableList<string> ListValue { get; set; }
+        public ImmutableList<string>? ListValue { get; set; }
     }
 }
