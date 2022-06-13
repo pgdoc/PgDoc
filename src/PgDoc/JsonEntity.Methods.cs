@@ -21,6 +21,7 @@ public static class JsonEntity
     /// body with a new one.
     /// </summary>
     public static IJsonEntity<T> Modify<T>(this IJsonEntity<T> entity, T newValue)
+        where T : class?
     {
         return new JsonEntity<T>(entity.Id, newValue, entity.Version);
     }
@@ -29,6 +30,7 @@ public static class JsonEntity
     /// Creates a new <see cref="IJsonEntity{T}"/> object with a new random ID and a version set to zero.
     /// </summary>
     public static IJsonEntity<T> Create<T>(T value, EntityType type)
+        where T : class?
     {
         return new JsonEntity<T>(EntityId.New(type), value, 0);
     }
@@ -37,6 +39,7 @@ public static class JsonEntity
     /// Creates a new <see cref="IJsonEntity{T}"/> object with a new random ID and a version set to zero.
     /// </summary>
     public static IJsonEntity<T> Create<T>(T value)
+        where T : class?
     {
         return Create(value, EntityType.GetEntityType<T>());
     }
@@ -45,6 +48,7 @@ public static class JsonEntity
     /// Deconstructs the ID, body and version of this <see cref="IJsonEntity{T}"/> object.
     /// </summary>
     public static void Deconstruct<T>(this IJsonEntity<T> source, out EntityId id, out T entity, out long version)
+        where T : class?
     {
         id = source.Id;
         entity = source.Entity;

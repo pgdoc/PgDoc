@@ -19,6 +19,7 @@ namespace PgDoc;
 /// </summary>
 /// <typeparam name="T">The type used to deserialize the JSON body of the document.</typeparam>
 public interface IJsonEntity<out T>
+    where T : class?
 {
     /// <summary>
     /// Gets the unique identifier of the document.

@@ -65,6 +65,7 @@ public class BatchBuilder
     }
 
     public void Check<T>(IJsonEntity<T> document)
+        where T : class?
     {
         Check(_jsonSerializer.ToDocument(document));
     }
@@ -100,6 +101,7 @@ public class BatchBuilder
     }
 
     public void Modify<T>(IJsonEntity<T> document)
+        where T : class?
     {
         Modify(_jsonSerializer.ToDocument(document));
     }

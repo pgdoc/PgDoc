@@ -24,6 +24,7 @@ public static class JsonSerializerExtensions
     /// to JSON.
     /// </summary>
     public static Document ToDocument<T>(this IJsonSerializer serializer, IJsonEntity<T?> jsonEntity)
+        where T : class?
     {
         return new Document(
             id: jsonEntity.Id.Value,
@@ -52,6 +53,7 @@ public static class JsonSerializerExtensions
     /// The document must have a non-null body, or an <see cref="ArgumentException"/> will be thrown.
     /// </summary>
     public static IJsonEntity<T> FromExistingDocument<T>(this IJsonSerializer serializer, Document document)
+        where T : class?
     {
         if (document.Body != null)
         {

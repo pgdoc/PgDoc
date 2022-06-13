@@ -19,6 +19,7 @@ namespace PgDoc;
 /// </summary>
 /// <typeparam name="T">The type used to deserialize the JSON body of the document.</typeparam>
 public class JsonEntity<T> : IJsonEntity<T>
+    where T : class?
 {
     public JsonEntity(EntityId id, T entity, long version)
     {
